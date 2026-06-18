@@ -1,0 +1,209 @@
+You are an expert React, Tailwind CSS, Node.js, Express.js, and MongoDB developer.
+
+Create a modern, responsive, mobile-first web application called "Bhaleri Online".
+
+Goal:
+Build a digital village platform for Bhaleri where users can find local services, buy and sell products, view schools, medical stores, bus timings, jobs, events, notices, and emergency contacts.
+
+Tech Stack:
+
+- React
+- Tailwind CSS
+- React Router DOM
+- Node.js
+- Express.js
+- MongoDB
+- JWT Authentication
+- Cloudinary for image uploads
+- Google Maps API
+- Framer Motion
+- Lucide React Icons
+
+User Roles:
+
+1. Admin
+2. User
+
+Main Features:
+
+Authentication:
+
+- Register
+- Login
+- Logout
+- Forgot Password
+- User Profile
+
+Home Page:
+
+- Hero section with village background image
+- Heading: "Welcome to Bhaleri Online"
+- Subheading: "Your digital village platform"
+- CTA Buttons:
+  - Explore Services
+  - Post an Item
+
+Service Categories:
+
+- Schools
+- Medical Stores
+- Hospitals
+- Shops
+- Buy & Sell
+- Bus Timings
+- Jobs
+- Events
+- Notices
+- Emergency Contacts
+- Village Map
+- About Bhaleri
+
+Navigation:
+
+Top Navbar:
+
+- Logo
+- Home
+- Buy & Sell
+- Jobs
+- About
+- Login
+- Register
+
+Bottom Mobile Navigation:
+
+- Home
+- Search
+- Add Post
+- Notifications
+- Profile
+
+Schools Section:
+
+- School name
+- Image
+- Address
+- Contact number
+- Fee details
+- Google Map location
+
+Medical Section:
+
+- Medical store name
+- Available medicines
+- Contact number
+- Location
+
+Shops Section:
+
+- Shop name
+- Shop image
+- Products available
+- Price
+- Contact number
+- Location
+
+Buy & Sell Section:
+
+- Users can create listings
+- Upload multiple images
+- Product title
+- Description
+- Price
+- Category
+- Seller contact information
+- Search and filter listings
+
+Bus Section:
+
+- Bus name
+- Route
+- Timings
+- Fare
+
+Jobs Section:
+
+- Local job listings
+- Contact information
+
+Events Section:
+
+- Event title
+- Date and time
+- Description
+
+Emergency Contacts:
+
+- Hospital
+- Ambulance
+- Police
+- Electricity department
+
+Village Map:
+
+- Interactive Google Map
+- Important places marked
+
+Admin Panel:
+
+- Dashboard
+- Manage users
+- Manage schools
+- Manage shops
+- Manage medical stores
+- Manage products
+- Approve or reject listings
+- Manage jobs
+- Manage events
+- Manage notices
+
+User Panel:
+
+- Edit profile
+- Create listings
+- Upload images
+- Save favourite posts
+- View own posts
+- Contact sellers
+
+Technical Requirements:
+
+- Mobile-first design
+- Responsive layout
+- Dark mode support
+- Search functionality
+- Filters by category, location, and price
+- Loading skeletons
+- Error handling
+- Protected routes
+- Role-based authentication
+- Reusable components
+
+Folder Structure:
+
+src/
+├── components/
+├── pages/
+├── layouts/
+├── hooks/
+├── context/
+├── services/
+├── routes/
+├── utils/
+├── data/
+
+Important Instructions:
+
+- Use functional components only.
+- Use Tailwind CSS only.
+- Explain each file before generating code.
+- Generate code step by step.
+- Do not generate the entire project at once.
+- Start with folder structure.
+- Then create the homepage.
+- Then create navbar and bottom navigation.
+- Then create routing.
+- Then create authentication.
+- Then create Buy & Sell functionality.
+- Then create the admin panel.
+- Keep code clean and beginner-friendly.

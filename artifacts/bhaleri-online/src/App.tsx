@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth";
+import { ThemeProvider } from "@/lib/theme";
 import Layout from "@/components/layout";
 import AdminLayout from "@/components/admin-layout";
 import NotFound from "@/pages/not-found";
@@ -12,8 +13,10 @@ import Home from "@/pages/home";
 import About from "@/pages/about/index";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import ForgotPassword from "@/pages/forgot-password";
 import Profile from "@/pages/profile/index";
 import Search from "@/pages/search/index";
+import VillageMap from "@/pages/map/index";
 
 // Directory Pages
 import SchoolsList from "@/pages/schools/index";
@@ -48,8 +51,7 @@ import AdminEmergency from "@/pages/admin/emergency";
 
 const queryClient = new QueryClient();
 
-// Helper to wrap admin routes in AdminLayout
-const AdminRoute = ({ component: Component, path }: { component: any, path: string }) => (
+const AdminRoute = ({ component: Component, path }: { component: any; path: string }) => (
   <Route path={path}>
     <AdminLayout>
       <Component />
@@ -82,27 +84,29 @@ function Router() {
             <Route path="/about" component={About} />
             <Route path="/login" component={Login} />
             <Route path="/register" component={Register} />
+            <Route path="/forgot-password" component={ForgotPassword} />
             <Route path="/profile" component={Profile} />
-            
+            <Route path="/map" component={VillageMap} />
+
             <Route path="/schools" component={SchoolsList} />
             <Route path="/schools/:id" component={SchoolDetail} />
-            
+
             <Route path="/medical" component={MedicalList} />
             <Route path="/medical/:id" component={MedicalDetail} />
-            
+
             <Route path="/shops" component={ShopsList} />
             <Route path="/shops/:id" component={ShopDetail} />
-            
+
             <Route path="/buses" component={BusList} />
             <Route path="/jobs" component={JobsList} />
             <Route path="/events" component={EventsList} />
             <Route path="/notices" component={NoticesList} />
             <Route path="/emergency" component={EmergencyList} />
-            
+
             <Route path="/buy-sell" component={BuySellList} />
             <Route path="/buy-sell/new" component={NewListing} />
             <Route path="/buy-sell/:id" component={ListingDetail} />
-            
+
             <Route component={NotFound} />
           </Switch>
         </Layout>
@@ -114,14 +118,16 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Router />
+            </WouterRouter>
+            <Toaster />
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
