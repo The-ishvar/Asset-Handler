@@ -1,0 +1,182 @@
+आप एक Senior Full Stack Developer और UI/UX Designer हैं।
+
+मुझे "Bhaleri Online" नाम की एक आधुनिक, मोबाइल-फ्रेंडली और पूरी तरह रिस्पॉन्सिव वेबसाइट बनानी है।
+
+टेक स्टैक:
+
+- Frontend: React + Tailwind CSS
+- Backend: Node.js + Express.js
+- Database: MongoDB
+- Authentication: JWT
+- Image Upload: Cloudinary
+- Maps: Google Maps API
+- Deployment: Vercel (Frontend) + Render (Backend)
+
+वेबसाइट का उद्देश्य:
+
+मेरे गाँव "Bhaleri" को ऑनलाइन लाना है, ताकि गाँव के लोग एक ही प्लेटफॉर्म पर सभी सेवाएँ देख और इस्तेमाल कर सकें।
+
+यूज़र रोल:
+
+1. Admin
+2. User
+
+मुख्य फीचर्स:
+
+1. Authentication
+- Register
+- Login
+- Logout
+- Forgot Password
+- User Profile
+
+2. Home Page
+
+होम पेज पर कार्ड और बटन होने चाहिए, जिन पर क्लिक करके यूज़र अलग-अलग सेक्शन देख सके।
+
+होम पेज सेक्शन:
+
+- Schools
+- Medical Stores
+- Hospitals
+- Shops
+- Buy & Sell Items
+- Bus Information
+- Village Map
+- Emergency Contacts
+- Jobs
+- Events
+- Important Notices
+
+3. Schools Section
+
+- स्कूल का नाम
+- फोटो
+- पता
+- संपर्क नंबर
+- क्लास जानकारी
+- फीस जानकारी
+- Google Map Location
+
+4. Medical Section
+
+- मेडिकल स्टोर का नाम
+- उपलब्ध दवाइयाँ
+- संपर्क नंबर
+- लोकेशन
+
+5. Shops Section
+
+- दुकान का नाम
+- फोटो
+- उपलब्ध सामान
+- कीमत
+- संपर्क नंबर
+- लोकेशन
+
+6. Buy & Sell Section
+
+- यूज़र नया आइटम पोस्ट कर सके
+- आइटम की फोटो अपलोड कर सके
+- कीमत जोड़ सके
+- संपर्क जानकारी जोड़ सके
+- दूसरे यूज़र आइटम देख सकें
+
+7. Bus Information
+
+- बस का नाम
+- समय
+- रूट
+- किराया
+
+8. Village Map
+
+- Bhaleri का इंटरैक्टिव मैप
+- महत्वपूर्ण स्थान दिखें
+
+9. Jobs Section
+
+- लोकल नौकरी की जानकारी
+- संपर्क नंबर
+
+10. Events Section
+
+- गाँव के कार्यक्रम
+- तारीख और समय
+
+11. Emergency Contacts
+
+- अस्पताल
+- एम्बुलेंस
+- पुलिस
+- बिजली विभाग
+
+12. About Page
+
+- Bhaleri गाँव के बारे में जानकारी
+- इतिहास
+- फोटो गैलरी
+
+13. Navigation
+
+Top Navbar:
+
+- Home
+- About
+- Buy & Sell
+- Login
+- Register
+- Profile
+
+Bottom Navigation (मोबाइल के लिए):
+
+- Home
+- Search
+- Add Post
+- Notifications
+- Profile
+
+Admin Panel Features:
+
+- Dashboard
+- User Management
+- School Management
+- Shop Management
+- Medical Management
+- Buy & Sell Post Approval
+- Bus Information Management
+- Events Management
+- Notice Management
+- Delete/Edit Any Content
+
+User Panel Features:
+
+- Profile Edit
+- Create Buy & Sell Posts
+- Upload Images
+- Save Favourite Posts
+- Contact Seller
+- View Own Posts
+
+Technical Requirements:
+
+- Clean folder structure
+- Reusable components
+- Protected routes
+- Role-based authentication
+- Search and filter
+- Pagination
+- Loading states
+- Error handling
+- Mobile-first design
+
+महत्वपूर्ण निर्देश:
+
+- पहले पूरा project structure बनाओ।
+- फिर database schema बनाओ।
+- फिर API routes बनाओ।
+- फिर frontend components बनाओ।
+- हर स्टेप को आसान हिंदी में समझाओ।
+- पूरा कोड एक साथ मत दो।
+- Step-by-step development करो।
+- Beginner-friendly explanation दो।

@@ -1,22 +1,45 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Bhaleri Online API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User management
+  - name: schools
+    description: Schools
+  - name: medical
+    description: Medical stores
+  - name: shops
+    description: Shops
+  - name: listings
+    description: Buy & Sell listings
+  - name: buses
+    description: Bus information
+  - name: jobs
+    description: Job listings
+  - name: events
+    description: Events
+  - name: notices
+    description: Important notices
+  - name: emergency
+    description: Emergency contacts
+  - name: stats
+    description: Dashboard stats
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +47,895 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users (admin)
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /schools:
+    get:
+      operationId: listSchools
+      tags: [schools]
+      summary: List all schools
+      responses:
+        "200":
+          description: List of schools
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/School"
+    post:
+      operationId: createSchool
+      tags: [schools]
+      summary: Add a school (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SchoolInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/School"
+
+  /schools/{id}:
+    get:
+      operationId: getSchool
+      tags: [schools]
+      summary: Get a school
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: School
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/School"
+    patch:
+      operationId: updateSchool
+      tags: [schools]
+      summary: Update school (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SchoolUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/School"
+    delete:
+      operationId: deleteSchool
+      tags: [schools]
+      summary: Delete school (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /medical:
+    get:
+      operationId: listMedical
+      tags: [medical]
+      summary: List all medical stores
+      responses:
+        "200":
+          description: List of medical stores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MedicalStore"
+    post:
+      operationId: createMedical
+      tags: [medical]
+      summary: Add a medical store (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MedicalStoreInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalStore"
+
+  /medical/{id}:
+    get:
+      operationId: getMedical
+      tags: [medical]
+      summary: Get a medical store
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Medical store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalStore"
+    patch:
+      operationId: updateMedical
+      tags: [medical]
+      summary: Update medical store (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MedicalStoreUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicalStore"
+    delete:
+      operationId: deleteMedical
+      tags: [medical]
+      summary: Delete medical store (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /shops:
+    get:
+      operationId: listShops
+      tags: [shops]
+      summary: List all shops
+      responses:
+        "200":
+          description: List of shops
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Shop"
+    post:
+      operationId: createShop
+      tags: [shops]
+      summary: Add a shop (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shop"
+
+  /shops/{id}:
+    get:
+      operationId: getShop
+      tags: [shops]
+      summary: Get a shop
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Shop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shop"
+    patch:
+      operationId: updateShop
+      tags: [shops]
+      summary: Update shop (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shop"
+    delete:
+      operationId: deleteShop
+      tags: [shops]
+      summary: Delete shop (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /listings:
+    get:
+      operationId: listListings
+      tags: [listings]
+      summary: List buy & sell listings
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+        - name: userId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+    post:
+      operationId: createListing
+      tags: [listings]
+      summary: Create a buy & sell listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /listings/{id}:
+    get:
+      operationId: getListing
+      tags: [listings]
+      summary: Get a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+    patch:
+      operationId: updateListing
+      tags: [listings]
+      summary: Update a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+    delete:
+      operationId: deleteListing
+      tags: [listings]
+      summary: Delete a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /listings/{id}/approve:
+    patch:
+      operationId: approveListing
+      tags: [listings]
+      summary: Approve or reject a listing (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingApproval"
+      responses:
+        "200":
+          description: Updated listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /buses:
+    get:
+      operationId: listBuses
+      tags: [buses]
+      summary: List all bus routes
+      responses:
+        "200":
+          description: List of bus routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bus"
+    post:
+      operationId: createBus
+      tags: [buses]
+      summary: Add a bus route (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bus"
+
+  /buses/{id}:
+    patch:
+      operationId: updateBus
+      tags: [buses]
+      summary: Update bus route (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bus"
+    delete:
+      operationId: deleteBus
+      tags: [buses]
+      summary: Delete bus route (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List job listings
+      responses:
+        "200":
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+    post:
+      operationId: createJob
+      tags: [jobs]
+      summary: Post a job (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+  /jobs/{id}:
+    patch:
+      operationId: updateJob
+      tags: [jobs]
+      summary: Update a job (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+    delete:
+      operationId: deleteJob
+      tags: [jobs]
+      summary: Delete job (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /events:
+    get:
+      operationId: listEvents
+      tags: [events]
+      summary: List events
+      responses:
+        "200":
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+    post:
+      operationId: createEvent
+      tags: [events]
+      summary: Create an event (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+
+  /events/{id}:
+    patch:
+      operationId: updateEvent
+      tags: [events]
+      summary: Update event (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+    delete:
+      operationId: deleteEvent
+      tags: [events]
+      summary: Delete event (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /notices:
+    get:
+      operationId: listNotices
+      tags: [notices]
+      summary: List important notices
+      responses:
+        "200":
+          description: List of notices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notice"
+    post:
+      operationId: createNotice
+      tags: [notices]
+      summary: Create a notice (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoticeInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notice"
+
+  /notices/{id}:
+    patch:
+      operationId: updateNotice
+      tags: [notices]
+      summary: Update notice (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoticeUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notice"
+    delete:
+      operationId: deleteNotice
+      tags: [notices]
+      summary: Delete notice (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /emergency:
+    get:
+      operationId: listEmergency
+      tags: [emergency]
+      summary: List emergency contacts
+      responses:
+        "200":
+          description: List of emergency contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmergencyContact"
+    post:
+      operationId: createEmergency
+      tags: [emergency]
+      summary: Add emergency contact (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmergencyContactInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmergencyContact"
+
+  /emergency/{id}:
+    patch:
+      operationId: updateEmergency
+      tags: [emergency]
+      summary: Update emergency contact (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmergencyContactUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmergencyContact"
+    delete:
+      operationId: deleteEmergency
+      tags: [emergency]
+      summary: Delete emergency contact (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /stats/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [stats]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /stats/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [stats]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +946,560 @@ components:
       required:
         - status
 
+    RegisterInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: ["string", "null"]
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      required: [id, name, email, role, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [user, admin]
+        createdAt:
+          type: string
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+
+    School:
+      type: object
+      required: [id, name, address, contactNumber, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        photoUrl:
+          type: ["string", "null"]
+        address:
+          type: string
+        contactNumber:
+          type: string
+        classInfo:
+          type: ["string", "null"]
+        feeInfo:
+          type: ["string", "null"]
+        mapLocation:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    SchoolInput:
+      type: object
+      required: [name, address, contactNumber]
+      properties:
+        name:
+          type: string
+        photoUrl:
+          type: ["string", "null"]
+        address:
+          type: string
+        contactNumber:
+          type: string
+        classInfo:
+          type: ["string", "null"]
+        feeInfo:
+          type: ["string", "null"]
+        mapLocation:
+          type: ["string", "null"]
+
+    SchoolUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        photoUrl:
+          type: ["string", "null"]
+        address:
+          type: string
+        contactNumber:
+          type: string
+        classInfo:
+          type: ["string", "null"]
+        feeInfo:
+          type: ["string", "null"]
+        mapLocation:
+          type: ["string", "null"]
+
+    MedicalStore:
+      type: object
+      required: [id, name, contactNumber, location, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        availableMedicines:
+          type: ["string", "null"]
+        contactNumber:
+          type: string
+        location:
+          type: string
+        mapLocation:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    MedicalStoreInput:
+      type: object
+      required: [name, contactNumber, location]
+      properties:
+        name:
+          type: string
+        availableMedicines:
+          type: ["string", "null"]
+        contactNumber:
+          type: string
+        location:
+          type: string
+        mapLocation:
+          type: ["string", "null"]
+
+    MedicalStoreUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        availableMedicines:
+          type: ["string", "null"]
+        contactNumber:
+          type: string
+        location:
+          type: string
+        mapLocation:
+          type: ["string", "null"]
+
+    Shop:
+      type: object
+      required: [id, name, contactNumber, location, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        photoUrl:
+          type: ["string", "null"]
+        availableItems:
+          type: ["string", "null"]
+        price:
+          type: ["string", "null"]
+        contactNumber:
+          type: string
+        location:
+          type: string
+        mapLocation:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ShopInput:
+      type: object
+      required: [name, contactNumber, location]
+      properties:
+        name:
+          type: string
+        photoUrl:
+          type: ["string", "null"]
+        availableItems:
+          type: ["string", "null"]
+        price:
+          type: ["string", "null"]
+        contactNumber:
+          type: string
+        location:
+          type: string
+        mapLocation:
+          type: ["string", "null"]
+
+    ShopUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        photoUrl:
+          type: ["string", "null"]
+        availableItems:
+          type: ["string", "null"]
+        price:
+          type: ["string", "null"]
+        contactNumber:
+          type: string
+        location:
+          type: string
+        mapLocation:
+          type: ["string", "null"]
+
+    Listing:
+      type: object
+      required: [id, title, price, contactInfo, status, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        photoUrl:
+          type: ["string", "null"]
+        price:
+          type: number
+        contactInfo:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        userId:
+          type: ["integer", "null"]
+        userName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ListingInput:
+      type: object
+      required: [title, price, contactInfo]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        photoUrl:
+          type: ["string", "null"]
+        price:
+          type: number
+        contactInfo:
+          type: string
+
+    ListingUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        photoUrl:
+          type: ["string", "null"]
+        price:
+          type: number
+        contactInfo:
+          type: string
+
+    ListingApproval:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected]
+
+    Bus:
+      type: object
+      required: [id, name, route, departureTime, fare, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        route:
+          type: string
+        departureTime:
+          type: string
+        arrivalTime:
+          type: ["string", "null"]
+        fare:
+          type: string
+        createdAt:
+          type: string
+
+    BusInput:
+      type: object
+      required: [name, route, departureTime, fare]
+      properties:
+        name:
+          type: string
+        route:
+          type: string
+        departureTime:
+          type: string
+        arrivalTime:
+          type: ["string", "null"]
+        fare:
+          type: string
+
+    BusUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        route:
+          type: string
+        departureTime:
+          type: string
+        arrivalTime:
+          type: ["string", "null"]
+        fare:
+          type: string
+
+    Job:
+      type: object
+      required: [id, title, contactNumber, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        contactNumber:
+          type: string
+        salary:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    JobInput:
+      type: object
+      required: [title, contactNumber]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        contactNumber:
+          type: string
+        salary:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+
+    JobUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        contactNumber:
+          type: string
+        salary:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+
+    Event:
+      type: object
+      required: [id, title, date, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        date:
+          type: string
+        time:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    EventInput:
+      type: object
+      required: [title, date]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        date:
+          type: string
+        time:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+
+    EventUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        date:
+          type: string
+        time:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+
+    Notice:
+      type: object
+      required: [id, title, content, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high]
+        createdAt:
+          type: string
+
+    NoticeInput:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high]
+
+    NoticeUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high]
+
+    EmergencyContact:
+      type: object
+      required: [id, name, contactNumber, category, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        contactNumber:
+          type: string
+        category:
+          type: string
+          enum: [hospital, ambulance, police, electricity, fire, other]
+        description:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    EmergencyContactInput:
+      type: object
+      required: [name, contactNumber, category]
+      properties:
+        name:
+          type: string
+        contactNumber:
+          type: string
+        category:
+          type: string
+          enum: [hospital, ambulance, police, electricity, fire, other]
+        description:
+          type: ["string", "null"]
+
+    EmergencyContactUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        contactNumber:
+          type: string
+        category:
+          type: string
+          enum: [hospital, ambulance, police, electricity, fire, other]
+        description:
+          type: ["string", "null"]
+
+    DashboardStats:
+      type: object
+      required: [totalUsers, totalSchools, totalShops, totalMedical, totalListings, pendingListings, totalJobs, upcomingEvents, activeNotices]
+      properties:
+        totalUsers:
+          type: integer
+        totalSchools:
+          type: integer
+        totalShops:
+          type: integer
+        totalMedical:
+          type: integer
+        totalListings:
+          type: integer
+        pendingListings:
+          type: integer
+        totalJobs:
+          type: integer
+        upcomingEvents:
+          type: integer
+        activeNotices:
+          type: integer
+
+    ActivityItem:
+      type: object
+      required: [id, type, title, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        createdAt:
+          type: string
