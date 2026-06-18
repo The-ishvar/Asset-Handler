@@ -1,0 +1,2 @@
+- [Bhaleri social routes](bhaleri-social-routes.md) — optionalAuth + social router mounting pattern for this project
+- [Bhaleri OpenAPI naming](bhaleri-openapi-naming.md) — naming conventions that prevent Orval codegen conflicts

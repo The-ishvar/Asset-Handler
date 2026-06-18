@@ -462,6 +462,135 @@ export interface ActivityItem {
   createdAt: string;
 }
 
+export interface ProfileUpdateInput {
+  /** @nullable */
+  bio?: string | null;
+  /** @nullable */
+  avatarUrl?: string | null;
+  /** @nullable */
+  coverUrl?: string | null;
+}
+
+export interface Reel {
+  id: number;
+  userId: number;
+  /** @nullable */
+  userName?: string | null;
+  /** @nullable */
+  userAvatarUrl?: string | null;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  videoUrl: string;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  isLiked: boolean;
+  createdAt: string;
+}
+
+export interface ReelInput {
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  videoUrl: string;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+}
+
+export interface ReelComment {
+  id: number;
+  reelId: number;
+  userId: number;
+  /** @nullable */
+  userName?: string | null;
+  /** @nullable */
+  userAvatarUrl?: string | null;
+  content: string;
+  createdAt: string;
+}
+
+export interface ReelCommentInput {
+  content: string;
+}
+
+export interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  bio?: string | null;
+  /** @nullable */
+  avatarUrl?: string | null;
+  /** @nullable */
+  coverUrl?: string | null;
+  role: string;
+  followerCount: number;
+  followingCount: number;
+  postCount: number;
+  reelCount: number;
+  isFollowing: boolean;
+  createdAt: string;
+}
+
+export type NotificationType = typeof NotificationType[keyof typeof NotificationType];
+
+
+export const NotificationType = {
+  follow: 'follow',
+  like: 'like',
+  comment: 'comment',
+  message: 'message',
+  listing: 'listing',
+} as const;
+
+export interface Notification {
+  id: number;
+  userId: number;
+  type: NotificationType;
+  content: string;
+  /** @nullable */
+  fromUserId?: number | null;
+  /** @nullable */
+  fromUserName?: string | null;
+  /** @nullable */
+  fromUserAvatar?: string | null;
+  isRead: boolean;
+  /** @nullable */
+  link?: string | null;
+  createdAt: string;
+}
+
+export interface Message {
+  id: number;
+  senderId: number;
+  receiverId: number;
+  /** @nullable */
+  senderName?: string | null;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface MessageInput {
+  receiverId: number;
+  content: string;
+}
+
+export interface Conversation {
+  userId: number;
+  userName: string;
+  /** @nullable */
+  userAvatarUrl?: string | null;
+  lastMessage: string;
+  lastMessageAt: string;
+  unreadCount: number;
+}
+
 export type ListListingsParams = {
 status?: ListListingsStatus;
 userId?: number;
@@ -475,4 +604,18 @@ export const ListListingsStatus = {
   approved: 'approved',
   rejected: 'rejected',
 } as const;
+
+export type ListReelsParams = {
+userId?: number;
+};
+
+export type ToggleReelLike200 = {
+  liked: boolean;
+  likeCount: number;
+};
+
+export type ToggleFollow200 = {
+  following: boolean;
+  followerCount: number;
+};
 

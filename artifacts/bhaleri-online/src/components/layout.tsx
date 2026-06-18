@@ -2,9 +2,13 @@ import React from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
-import { Home, Search, PlusCircle, Bell, User as UserIcon, Sun, Moon, Menu, X } from "lucide-react";
+import {
+  Home, Search, PlusCircle, Bell, User as UserIcon,
+  Sun, Moon, Menu, X, MessageCircle, Play
+} from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import { useListNotifications } from "@workspace/api-client-react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
@@ -12,9 +16,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const { data: notifications } = useListNotifications({
+    query: { enabled: !!user, refetchInterval: 30000 }
+  });
+  const unreadCount = notifications?.filter(n => !n.isRead).length ?? 0;
+
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Buy & Sell", href: "/buy-sell" },
+    { label: "Reels", href: "/reels" },
     { label: "Jobs", href: "/jobs" },
     { label: "Events", href: "/events" },
     { label: "Village Map", href: "/map" },
@@ -51,6 +61,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </Button>
               {user ? (
                 <>
+                  {/* Notifications bell */}
+                  <Link href="/notifications">
+                    <Button variant="ghost" size="icon" className="relative">
+                      <Bell className="w-4 h-4" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
+                    </Button>
+                  </Link>
+                  {/* Messages */}
+                  <Link href="/messages">
+                    <Button variant="ghost" size="icon">
+                      <MessageCircle className="w-4 h-4" />
+                    </Button>
+                  </Link>
                   {user.role === "admin" && (
                     <Link href="/admin" className="text-sm font-medium text-orange-600 hover:underline">
                       Admin
@@ -76,8 +103,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          {/* Mobile: dark mode + hamburger */}
+          {/* Mobile: notification + dark mode + hamburger */}
           <div className="flex items-center gap-1 ml-auto md:hidden">
+            {user && (
+              <Link href="/notifications">
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="w-4 h-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            )}
             <Button variant="ghost" size="icon" onClick={toggleTheme}>
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
@@ -105,7 +144,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="border-t border-border pt-2 mt-2">
               {user ? (
                 <div className="flex items-center justify-between px-3 py-2">
-                  <span className="text-sm font-medium">{user.name || user.email}</span>
+                  <div>
+                    <div className="text-sm font-medium">{user.name || user.email}</div>
+                    <div className="flex gap-3 mt-1">
+                      <Link href="/messages" onClick={() => setMobileMenuOpen(false)} className="text-xs text-muted-foreground hover:text-foreground">Messages</Link>
+                      <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-xs text-muted-foreground hover:text-foreground">Profile</Link>
+                    </div>
+                  </div>
                   <Button size="sm" variant="outline" onClick={() => { logout(); setMobileMenuOpen(false); }}>
                     Logout
                   </Button>
@@ -135,9 +180,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Home className="w-5 h-5" />
           <span className="text-[10px]">Home</span>
         </Link>
-        <Link href="/search" className={`flex flex-col items-center justify-center w-full h-full gap-0.5 ${location === "/search" ? "text-primary" : "text-muted-foreground"}`}>
-          <Search className="w-5 h-5" />
-          <span className="text-[10px]">Search</span>
+        <Link href="/reels" className={`flex flex-col items-center justify-center w-full h-full gap-0.5 ${location.startsWith("/reels") ? "text-primary" : "text-muted-foreground"}`}>
+          <Play className="w-5 h-5" />
+          <span className="text-[10px]">Reels</span>
         </Link>
         <Link href="/buy-sell/new" className={`flex flex-col items-center justify-center w-full h-full gap-0.5 ${location === "/buy-sell/new" ? "text-primary" : "text-muted-foreground"}`}>
           <div className="bg-primary rounded-full p-2 -mt-4">
@@ -145,9 +190,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <span className="text-[10px] mt-1">Post</span>
         </Link>
-        <Link href="/notices" className={`flex flex-col items-center justify-center w-full h-full gap-0.5 ${location === "/notices" ? "text-primary" : "text-muted-foreground"}`}>
-          <Bell className="w-5 h-5" />
-          <span className="text-[10px]">Notices</span>
+        <Link href={user ? "/messages" : "/login"} className={`flex flex-col items-center justify-center w-full h-full gap-0.5 ${location.startsWith("/messages") ? "text-primary" : "text-muted-foreground"}`}>
+          <MessageCircle className="w-5 h-5" />
+          <span className="text-[10px]">Messages</span>
         </Link>
         <Link href={user ? "/profile" : "/login"} className={`flex flex-col items-center justify-center w-full h-full gap-0.5 ${location === "/profile" || location === "/login" ? "text-primary" : "text-muted-foreground"}`}>
           <UserIcon className="w-5 h-5" />

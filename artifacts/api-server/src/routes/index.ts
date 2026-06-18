@@ -12,6 +12,10 @@ import eventsRouter from "./events";
 import noticesRouter from "./notices";
 import emergencyRouter from "./emergency";
 import statsRouter from "./stats";
+import reelsRouter from "./reels";
+import socialRouter from "./social";
+import notificationsRouter from "./notifications";
+import messagesRouter from "./messages";
 
 const router: IRouter = Router();
 
@@ -28,5 +32,9 @@ router.use("/events", eventsRouter);
 router.use("/notices", noticesRouter);
 router.use("/emergency", emergencyRouter);
 router.use("/stats", statsRouter);
+router.use("/reels", reelsRouter);
+router.use(socialRouter);
+router.use("/notifications", notificationsRouter);
+router.use("/messages", messagesRouter);
 
 export default router;

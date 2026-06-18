@@ -111,7 +111,7 @@ export default function Home() {
                   <CardContent className="p-4">
                     <div className="font-semibold text-foreground line-clamp-1">{event.title}</div>
                     <div className="text-sm text-muted-foreground mt-1">
-                      {new Date(event.eventDate).toLocaleDateString("en-IN", {
+                      {new Date(event.date).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "long",
                         year: "numeric",

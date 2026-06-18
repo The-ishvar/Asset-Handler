@@ -36,6 +36,14 @@ import BuySellList from "@/pages/buy-sell/index";
 import ListingDetail from "@/pages/buy-sell/detail";
 import NewListing from "@/pages/buy-sell/new";
 
+// Social
+import Reels from "@/pages/reels/index";
+import NewReel from "@/pages/reels/new";
+import NotificationsPage from "@/pages/notifications/index";
+import MessagesPage from "@/pages/messages/index";
+import ConversationPage from "@/pages/messages/conversation";
+import PublicProfile from "@/pages/profile/[id]";
+
 // Admin Pages
 import AdminDashboard from "@/pages/admin/index";
 import AdminUsers from "@/pages/admin/users";
@@ -106,6 +114,13 @@ function Router() {
             <Route path="/buy-sell" component={BuySellList} />
             <Route path="/buy-sell/new" component={NewListing} />
             <Route path="/buy-sell/:id" component={ListingDetail} />
+
+            <Route path="/reels" component={Reels} />
+            <Route path="/reels/new" component={NewReel} />
+            <Route path="/notifications" component={NotificationsPage} />
+            <Route path="/messages" component={MessagesPage} />
+            <Route path="/messages/:userId" component={ConversationPage} />
+            <Route path="/profile/:id" component={PublicProfile} />
 
             <Route component={NotFound} />
           </Switch>

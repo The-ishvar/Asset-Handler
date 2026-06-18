@@ -33,6 +33,14 @@ tags:
     description: Emergency contacts
   - name: stats
     description: Dashboard stats
+  - name: reels
+    description: Short video reels
+  - name: social
+    description: Follow system
+  - name: notifications
+    description: User notifications
+  - name: messages
+    description: User messaging
 
 paths:
   /healthz:
@@ -936,6 +944,318 @@ paths:
                 items:
                   $ref: "#/components/schemas/ActivityItem"
 
+  # ─── Reels ────────────────────────────────────────────────────
+  /reels:
+    get:
+      operationId: listReels
+      tags: [reels]
+      summary: List all reels
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of reels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reel"
+    post:
+      operationId: createReel
+      tags: [reels]
+      summary: Create a reel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReelInput"
+      responses:
+        "201":
+          description: Reel created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reel"
+
+  /reels/{id}:
+    get:
+      operationId: getReel
+      tags: [reels]
+      summary: Get a reel by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reel"
+    delete:
+      operationId: deleteReel
+      tags: [reels]
+      summary: Delete a reel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /reels/{id}/like:
+    post:
+      operationId: toggleReelLike
+      tags: [reels]
+      summary: Toggle like on a reel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Like toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [liked, likeCount]
+                properties:
+                  liked:
+                    type: boolean
+                  likeCount:
+                    type: integer
+
+  /reels/{id}/view:
+    post:
+      operationId: recordReelView
+      tags: [reels]
+      summary: Increment view count
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: View recorded
+
+  /reels/{id}/comments:
+    get:
+      operationId: listReelComments
+      tags: [reels]
+      summary: Get comments for a reel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReelComment"
+    post:
+      operationId: addReelComment
+      tags: [reels]
+      summary: Add a comment to a reel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReelCommentInput"
+      responses:
+        "201":
+          description: Comment added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReelComment"
+
+  # ─── Social ───────────────────────────────────────────────────
+  /users/{id}/profile:
+    get:
+      operationId: getUserProfile
+      tags: [social]
+      summary: Get user public profile with social stats
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/{id}/follow:
+    post:
+      operationId: toggleFollow
+      tags: [social]
+      summary: Follow or unfollow a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Follow toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [following, followerCount]
+                properties:
+                  following:
+                    type: boolean
+                  followerCount:
+                    type: integer
+
+  /users/me/update-profile:
+    patch:
+      operationId: patchMyProfile
+      tags: [social]
+      summary: Update own profile bio, avatar, cover
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdateInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # ─── Notifications ────────────────────────────────────────────
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: Get notifications for current user
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      responses:
+        "200":
+          description: Marked read
+
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark a notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Marked read
+
+  # ─── Messages ─────────────────────────────────────────────────
+  /messages:
+    get:
+      operationId: listConversations
+      tags: [messages]
+      summary: Get all conversations for current user
+      responses:
+        "200":
+          description: Conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send a message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  /messages/{userId}:
+    get:
+      operationId: getConversation
+      tags: [messages]
+      summary: Get messages between current user and another user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+
 components:
   schemas:
     HealthStatus:
@@ -1503,3 +1823,187 @@ components:
           type: ["string", "null"]
         createdAt:
           type: string
+
+    ProfileUpdateInput:
+      type: object
+      properties:
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        coverUrl:
+          type: ["string", "null"]
+
+    Reel:
+      type: object
+      required: [id, userId, title, videoUrl, viewCount, likeCount, commentCount, isLiked, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        userName:
+          type: ["string", "null"]
+        userAvatarUrl:
+          type: ["string", "null"]
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        videoUrl:
+          type: string
+        thumbnailUrl:
+          type: ["string", "null"]
+        viewCount:
+          type: integer
+        likeCount:
+          type: integer
+        commentCount:
+          type: integer
+        isLiked:
+          type: boolean
+        createdAt:
+          type: string
+
+    ReelInput:
+      type: object
+      required: [title, videoUrl]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        videoUrl:
+          type: string
+        thumbnailUrl:
+          type: ["string", "null"]
+
+    ReelComment:
+      type: object
+      required: [id, reelId, userId, content, createdAt]
+      properties:
+        id:
+          type: integer
+        reelId:
+          type: integer
+        userId:
+          type: integer
+        userName:
+          type: ["string", "null"]
+        userAvatarUrl:
+          type: ["string", "null"]
+        content:
+          type: string
+        createdAt:
+          type: string
+
+    ReelCommentInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    UserProfile:
+      type: object
+      required: [id, name, email, role, followerCount, followingCount, postCount, reelCount, isFollowing, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        coverUrl:
+          type: ["string", "null"]
+        role:
+          type: string
+        followerCount:
+          type: integer
+        followingCount:
+          type: integer
+        postCount:
+          type: integer
+        reelCount:
+          type: integer
+        isFollowing:
+          type: boolean
+        createdAt:
+          type: string
+
+    Notification:
+      type: object
+      required: [id, userId, type, content, isRead, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        type:
+          type: string
+          enum: [follow, like, comment, message, listing]
+        content:
+          type: string
+        fromUserId:
+          type: ["integer", "null"]
+        fromUserName:
+          type: ["string", "null"]
+        fromUserAvatar:
+          type: ["string", "null"]
+        isRead:
+          type: boolean
+        link:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    Message:
+      type: object
+      required: [id, senderId, receiverId, content, isRead, createdAt]
+      properties:
+        id:
+          type: integer
+        senderId:
+          type: integer
+        receiverId:
+          type: integer
+        senderName:
+          type: ["string", "null"]
+        content:
+          type: string
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+
+    MessageInput:
+      type: object
+      required: [receiverId, content]
+      properties:
+        receiverId:
+          type: integer
+        content:
+          type: string
+
+    Conversation:
+      type: object
+      required: [userId, userName, lastMessage, lastMessageAt, unreadCount]
+      properties:
+        userId:
+          type: integer
+        userName:
+          type: string
+        userAvatarUrl:
+          type: ["string", "null"]
+        lastMessage:
+          type: string
+        lastMessageAt:
+          type: string
+        unreadCount:
+          type: integer

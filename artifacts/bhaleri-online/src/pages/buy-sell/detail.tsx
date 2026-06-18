@@ -1,13 +1,15 @@
-import { useRoute } from "wouter";
+import { useRoute, Link } from "wouter";
 import { useGetListing } from "@workspace/api-client-react";
+import { useAuth } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, ShoppingBag, User, Calendar } from "lucide-react";
+import { Phone, ShoppingBag, User, Calendar, MessageCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 
 export default function ListingDetail() {
   const [, params] = useRoute("/buy-sell/:id");
   const id = Number(params?.id);
+  const { user } = useAuth();
   
   const { data: listing, isLoading, error } = useGetListing(id, { 
     query: { enabled: !!id } 
@@ -97,6 +99,14 @@ export default function ListingDetail() {
                 <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" asChild>
                   <a href={`tel:${listing.contactInfo}`}>Call Seller</a>
                 </Button>
+                {user && listing.userId && user.id !== listing.userId && (
+                  <Link href={`/messages/${listing.userId}`}>
+                    <Button variant="outline" className="w-full mt-2">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Message Seller
+                    </Button>
+                  </Link>
+                )}
               </div>
             </CardContent>
           </Card>

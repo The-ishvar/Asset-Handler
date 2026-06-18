@@ -825,3 +825,249 @@ export const GetRecentActivityResponseItem = zod.object({
 export const GetRecentActivityResponse = zod.array(GetRecentActivityResponseItem)
 
 
+/**
+ * @summary List all reels
+ */
+export const ListReelsQueryParams = zod.object({
+  "userId": zod.coerce.number().optional()
+})
+
+export const ListReelsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().nullish(),
+  "userAvatarUrl": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "videoUrl": zod.string(),
+  "thumbnailUrl": zod.string().nullish(),
+  "viewCount": zod.number(),
+  "likeCount": zod.number(),
+  "commentCount": zod.number(),
+  "isLiked": zod.boolean(),
+  "createdAt": zod.string()
+})
+export const ListReelsResponse = zod.array(ListReelsResponseItem)
+
+
+/**
+ * @summary Create a reel
+ */
+export const CreateReelBody = zod.object({
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "videoUrl": zod.string(),
+  "thumbnailUrl": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get a reel by ID
+ */
+export const GetReelParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetReelResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().nullish(),
+  "userAvatarUrl": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "videoUrl": zod.string(),
+  "thumbnailUrl": zod.string().nullish(),
+  "viewCount": zod.number(),
+  "likeCount": zod.number(),
+  "commentCount": zod.number(),
+  "isLiked": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a reel
+ */
+export const DeleteReelParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Toggle like on a reel
+ */
+export const ToggleReelLikeParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ToggleReelLikeResponse = zod.object({
+  "liked": zod.boolean(),
+  "likeCount": zod.number()
+})
+
+
+/**
+ * @summary Increment view count
+ */
+export const RecordReelViewParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Get comments for a reel
+ */
+export const ListReelCommentsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ListReelCommentsResponseItem = zod.object({
+  "id": zod.number(),
+  "reelId": zod.number(),
+  "userId": zod.number(),
+  "userName": zod.string().nullish(),
+  "userAvatarUrl": zod.string().nullish(),
+  "content": zod.string(),
+  "createdAt": zod.string()
+})
+export const ListReelCommentsResponse = zod.array(ListReelCommentsResponseItem)
+
+
+/**
+ * @summary Add a comment to a reel
+ */
+export const AddReelCommentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AddReelCommentBody = zod.object({
+  "content": zod.string()
+})
+
+
+/**
+ * @summary Get user public profile with social stats
+ */
+export const GetUserProfileParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetUserProfileResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string().nullish(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "coverUrl": zod.string().nullish(),
+  "role": zod.string(),
+  "followerCount": zod.number(),
+  "followingCount": zod.number(),
+  "postCount": zod.number(),
+  "reelCount": zod.number(),
+  "isFollowing": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Follow or unfollow a user
+ */
+export const ToggleFollowParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ToggleFollowResponse = zod.object({
+  "following": zod.boolean(),
+  "followerCount": zod.number()
+})
+
+
+/**
+ * @summary Update own profile bio, avatar, cover
+ */
+export const PatchMyProfileBody = zod.object({
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "coverUrl": zod.string().nullish()
+})
+
+export const PatchMyProfileResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "role": zod.enum(['user', 'admin']),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Get notifications for current user
+ */
+export const ListNotificationsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "type": zod.enum(['follow', 'like', 'comment', 'message', 'listing']),
+  "content": zod.string(),
+  "fromUserId": zod.number().nullish(),
+  "fromUserName": zod.string().nullish(),
+  "fromUserAvatar": zod.string().nullish(),
+  "isRead": zod.boolean(),
+  "link": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListNotificationsResponse = zod.array(ListNotificationsResponseItem)
+
+
+/**
+ * @summary Mark a notification as read
+ */
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Get all conversations for current user
+ */
+export const ListConversationsResponseItem = zod.object({
+  "userId": zod.number(),
+  "userName": zod.string(),
+  "userAvatarUrl": zod.string().nullish(),
+  "lastMessage": zod.string(),
+  "lastMessageAt": zod.string(),
+  "unreadCount": zod.number()
+})
+export const ListConversationsResponse = zod.array(ListConversationsResponseItem)
+
+
+/**
+ * @summary Send a message
+ */
+export const SendMessageBody = zod.object({
+  "receiverId": zod.number(),
+  "content": zod.string()
+})
+
+
+/**
+ * @summary Get messages between current user and another user
+ */
+export const GetConversationParams = zod.object({
+  "userId": zod.coerce.number()
+})
+
+export const GetConversationResponseItem = zod.object({
+  "id": zod.number(),
+  "senderId": zod.number(),
+  "receiverId": zod.number(),
+  "senderName": zod.string().nullish(),
+  "content": zod.string(),
+  "isRead": zod.boolean(),
+  "createdAt": zod.string()
+})
+export const GetConversationResponse = zod.array(GetConversationResponseItem)
+
+
