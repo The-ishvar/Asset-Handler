@@ -35,8 +35,12 @@ export default function Layout({ children }) {
     <div className="min-h-[100dvh] flex flex-col bg-background pb-16 md:pb-0">
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-2xl items-center px-4">
-          <Link href="/" className="mr-6 flex items-center space-x-2 shrink-0">
-            <span className="font-bold text-lg text-primary">🏡 Bhaleri Online</span>
+          <Link href="/" className="mr-6 flex items-center gap-2.5 shrink-0">
+            <img src="/logo.svg" alt="Bhaleri Online" className="w-9 h-9 rounded-full shadow-sm" />
+            <div className="leading-tight">
+              <div className="font-bold text-base text-primary leading-none">Bhaleri Online</div>
+              <div className="text-[10px] text-muted-foreground leading-none mt-0.5">by Eshwar Suthar</div>
+            </div>
           </Link>
 
           <div className="hidden md:flex md:flex-1 md:items-center md:justify-between">

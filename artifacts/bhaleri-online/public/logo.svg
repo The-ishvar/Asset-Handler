@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="100" fill="url(#bg)"/>
+  
+  <!-- Gradient definitions -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#fed7aa"/>
+      <stop offset="100%" stop-color="#ffedd5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sun -->
+  <circle cx="100" cy="68" r="16" fill="#fef3c7"/>
+  <circle cx="100" cy="68" r="11" fill="#fde68a"/>
+
+  <!-- House body -->
+  <rect x="62" y="108" width="76" height="52" rx="3" fill="white" fill-opacity="0.95"/>
+
+  <!-- Roof -->
+  <polygon points="55,110 100,72 145,110" fill="white" fill-opacity="0.95"/>
+  <polygon points="58,110 100,76 142,110" fill="#fed7aa"/>
+
+  <!-- Door -->
+  <rect x="87" y="130" width="26" height="30" rx="3" fill="#f97316"/>
+
+  <!-- Windows -->
+  <rect x="68" y="116" width="16" height="14" rx="2" fill="#bfdbfe"/>
+  <rect x="116" y="116" width="16" height="14" rx="2" fill="#bfdbfe"/>
+
+  <!-- Ground line -->
+  <rect x="45" y="158" width="110" height="3" rx="1.5" fill="white" fill-opacity="0.5"/>
+
+  <!-- Text: B -->
+  <text x="100" y="185" font-family="Georgia, serif" font-size="11" font-weight="bold" fill="white" fill-opacity="0.9" text-anchor="middle" letter-spacing="2">BHALERI</text>
+</svg>
