@@ -27,6 +27,7 @@ export default function Layout({ children }) {
 
   const navLinks = [
     { label: "Home", href: "/" },
+    { label: "Posts", href: "/posts" },
     { label: "Buy & Sell", href: "/buy-sell" },
     { label: "Reels", href: "/reels" },
     { label: "Jobs", href: "/jobs" },

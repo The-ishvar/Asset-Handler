@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { jobsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { requireAdmin } from "../middlewares/auth";
+import { requireAdmin, requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
@@ -32,7 +32,7 @@ router.get("/:id", async (req, res) => {
   res.json(fmt(row));
 });
 
-router.post("/", requireAdmin, async (req, res) => {
+router.post("/", requireAuth, async (req, res) => {
   const { title, company, type, location, salary, contactPhone, contactNumber, description } = req.body;
   if (!title) { res.status(400).json({ error: "title required" }); return; }
   const [row] = await db.insert(jobsTable).values({

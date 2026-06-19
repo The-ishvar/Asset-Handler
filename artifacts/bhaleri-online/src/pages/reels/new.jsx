@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Play, Upload, Link2, Video, CheckCircle2, X } from "lucide-react";
+import { ArrowLeft, Play, Upload, Video, CheckCircle2, X, Tag } from "lucide-react";
 
 export default function NewReel() {
   const { user } = useAuth();
@@ -18,18 +18,17 @@ export default function NewReel() {
   const createReel = useCreateReel();
   const fileInputRef = useRef(null);
 
-  const [mode, setMode] = useState("upload"); // "upload" | "url"
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
-  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [tags, setTags] = useState("");
   const [uploadedPath, setUploadedPath] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const { uploadFile, isUploading, progress } = useUpload({
     onSuccess: (result) => {
       setUploadedPath(result.objectUrl);
-      toast({ title: "Video uploaded successfully!" });
+      toast({ title: "Video upload ho gaya!" });
     },
     onError: (err) => {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
@@ -42,150 +41,191 @@ export default function NewReel() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("video/")) {
-      toast({ title: "Please select a video file", variant: "destructive" }); return;
+      toast({ title: "Kripya video file select karein", variant: "destructive" }); return;
     }
     if (file.size > 100 * 1024 * 1024) {
-      toast({ title: "Video must be under 100MB", variant: "destructive" }); return;
+      toast({ title: "Video 100MB se chhoti honi chahiye", variant: "destructive" }); return;
     }
     setSelectedFile(file);
+    // Local preview before upload
+    const localUrl = URL.createObjectURL(file);
+    setPreviewUrl(localUrl);
     await uploadFile(file);
+  };
+
+  const handleRemoveVideo = () => {
+    setUploadedPath(null);
+    setSelectedFile(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const finalVideoUrl = mode === "upload" ? uploadedPath : videoUrl;
-    if (!finalVideoUrl) {
-      toast({ title: mode === "upload" ? "Please upload a video first" : "Please enter a video URL", variant: "destructive" }); return;
+    if (!uploadedPath) {
+      toast({ title: "Pehle video upload karein", variant: "destructive" }); return;
+    }
+    if (!title.trim()) {
+      toast({ title: "Title zaroor likhein", variant: "destructive" }); return;
     }
     createReel.mutate(
-      { title, description, videoUrl: finalVideoUrl, thumbnailUrl: thumbnailUrl || undefined },
+      {
+        title: title.trim(),
+        description: description || undefined,
+        videoUrl: uploadedPath,
+        thumbnailUrl: undefined,
+      },
       {
         onSuccess: () => {
-          toast({ title: "🎬 Reel posted!" });
+          toast({ title: "🎬 Reel post ho gaya!" });
           setLocation("/reels");
         },
-        onError: (err) => toast({ title: "Failed to post reel", description: err.message, variant: "destructive" }),
+        onError: (err) => toast({ title: "Reel post nahi hua", description: err.message, variant: "destructive" }),
       }
     );
   };
 
-  const isYouTube = videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be");
-
   return (
     <div className="max-w-xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/reels"><Button variant="ghost" size="icon"><ArrowLeft className="w-5 h-5" /></Button></Link>
-        <h1 className="text-2xl font-bold">Create Reel</h1>
+        <Link href="/reels">
+          <Button variant="ghost" size="icon"><ArrowLeft className="w-5 h-5" /></Button>
+        </Link>
+        <h1 className="text-2xl font-bold">Reel Banayein</h1>
       </div>
 
       <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label>Title *</Label>
-              <Input placeholder="Give your reel a catchy title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-            </div>
 
-            {/* Mode toggle */}
+            {/* Video Upload */}
             <div className="space-y-3">
-              <Label>Video Source</Label>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setMode("upload")} className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border-2 text-sm font-medium transition-colors ${mode === "upload" ? "border-primary bg-primary/5 text-primary" : "border-muted text-muted-foreground hover:border-muted-foreground/50"}`}>
-                  <Upload className="w-4 h-4" /> Upload Video
+              <Label>Video Upload *</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+
+              {!selectedFile && !isUploading && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full border-2 border-dashed border-muted-foreground/30 rounded-xl p-10 hover:border-primary/50 hover:bg-primary/5 transition-colors flex flex-col items-center gap-3"
+                >
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Video className="w-8 h-8 text-primary" />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold text-sm">Gallery se video choose karein</p>
+                    <p className="text-xs text-muted-foreground mt-1">MP4, MOV, AVI — max 100MB</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-primary font-medium mt-1">
+                    <Upload className="w-4 h-4" />
+                    Device se Upload
+                  </div>
                 </button>
-                <button type="button" onClick={() => setMode("url")} className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border-2 text-sm font-medium transition-colors ${mode === "url" ? "border-primary bg-primary/5 text-primary" : "border-muted text-muted-foreground hover:border-muted-foreground/50"}`}>
-                  <Link2 className="w-4 h-4" /> Video URL
-                </button>
-              </div>
-            </div>
+              )}
 
-            {mode === "upload" && (
-              <div className="space-y-3">
-                <input ref={fileInputRef} type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
-
-                {!uploadedPath && !isUploading && (
-                  <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full border-2 border-dashed border-muted-foreground/30 rounded-xl p-8 hover:border-primary/50 hover:bg-primary/5 transition-colors flex flex-col items-center gap-3">
-                    <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Video className="w-7 h-7 text-primary" />
+              {isUploading && (
+                <div className="w-full border-2 border-dashed border-primary/40 rounded-xl p-8 flex flex-col items-center gap-4">
+                  <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Upload className="w-7 h-7 text-primary animate-pulse" />
+                  </div>
+                  <div className="w-full space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground truncate max-w-[200px]">{selectedFile?.name}...</span>
+                      <span className="font-medium text-primary">{progress}%</span>
                     </div>
-                    <div className="text-center">
-                      <p className="font-semibold text-sm">Click to upload video</p>
-                      <p className="text-xs text-muted-foreground mt-1">MP4, MOV, AVI up to 100MB</p>
-                    </div>
-                  </button>
-                )}
-
-                {isUploading && (
-                  <div className="w-full border-2 border-dashed border-primary/40 rounded-xl p-8 flex flex-col items-center gap-4">
-                    <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Upload className="w-7 h-7 text-primary animate-pulse" />
-                    </div>
-                    <div className="w-full space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Uploading {selectedFile?.name}...</span>
-                        <span className="font-medium text-primary">{progress}%</span>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div className="bg-primary h-2 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
-                      </div>
+                    <div className="w-full bg-muted rounded-full h-2.5">
+                      <div className="bg-primary h-2.5 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {uploadedPath && !isUploading && (
-                  <div className="border-2 border-green-500/40 bg-green-50/50 dark:bg-green-900/10 rounded-xl p-4 flex items-center gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" />
+              {selectedFile && !isUploading && (
+                <div className="space-y-3">
+                  <div className={`border-2 rounded-xl p-4 flex items-center gap-3 ${uploadedPath ? "border-green-500/40 bg-green-50/50 dark:bg-green-900/10" : "border-yellow-500/40 bg-yellow-50/50"}`}>
+                    {uploadedPath ? (
+                      <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" />
+                    ) : (
+                      <Upload className="w-6 h-6 text-yellow-600 shrink-0 animate-pulse" />
+                    )}
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-green-700 dark:text-green-400">Video uploaded!</p>
-                      <p className="text-xs text-muted-foreground truncate">{selectedFile?.name}</p>
+                      <p className={`font-medium text-sm ${uploadedPath ? "text-green-700 dark:text-green-400" : "text-yellow-700"}`}>
+                        {uploadedPath ? "Video upload ho gaya!" : "Uploading..."}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">{selectedFile.name}</p>
                     </div>
-                    <button type="button" onClick={() => { setUploadedPath(null); setSelectedFile(null); }} className="text-muted-foreground hover:text-foreground p-1 rounded">
+                    <button
+                      type="button"
+                      onClick={handleRemoveVideo}
+                      className="text-muted-foreground hover:text-foreground p-1 rounded shrink-0"
+                    >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                )}
 
-                {uploadedPath && (
-                  <div className="rounded-lg overflow-hidden bg-black aspect-video">
-                    <video src={uploadedPath} className="w-full h-full" controls />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {mode === "url" && (
-              <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Input type="url" placeholder="YouTube link or direct video URL (.mp4)" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
-                  <p className="text-xs text-muted-foreground">Paste a YouTube link or a direct MP4 video URL</p>
+                  {/* Video preview */}
+                  {previewUrl && (
+                    <div className="rounded-xl overflow-hidden bg-black aspect-[9/16] max-h-80">
+                      <video src={previewUrl} className="w-full h-full object-contain" controls />
+                    </div>
+                  )}
                 </div>
-                {videoUrl && (
-                  <div className="rounded-lg overflow-hidden bg-black aspect-video">
-                    {isYouTube ? (
-                      <iframe src={videoUrl.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")} className="w-full h-full" allow="autoplay" title="Preview" />
-                    ) : (
-                      <video src={videoUrl} className="w-full h-full" controls />
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label>Thumbnail URL <span className="text-muted-foreground font-normal">(optional)</span></Label>
-              <Input type="url" placeholder="Cover image URL" value={thumbnailUrl} onChange={(e) => setThumbnailUrl(e.target.value)} />
+              )}
             </div>
 
+            {/* Title */}
+            <div className="space-y-2">
+              <Label>Title *</Label>
+              <Input
+                placeholder="Reel ka catchy title likhein"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Tag className="w-3.5 h-3.5" /> Tags
+                <span className="text-muted-foreground font-normal">(optional)</span>
+              </Label>
+              <Input
+                placeholder="#funny, #dance, #village, #bhaleri"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+              />
+            </div>
+
+            {/* Description */}
             <div className="space-y-2">
               <Label>Description <span className="text-muted-foreground font-normal">(optional)</span></Label>
-              <Textarea placeholder="What's this reel about?" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+              <Textarea
+                placeholder="Is reel ke baare mein kuch likhein..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+              />
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button type="button" variant="outline" className="flex-1" onClick={() => setLocation("/reels")}>Cancel</Button>
-              <Button type="submit" className="flex-1" disabled={createReel.isPending || isUploading}>
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setLocation("/reels")}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={createReel.isPending || isUploading || !uploadedPath}
+              >
                 <Play className="w-4 h-4 mr-2" />
-                {createReel.isPending ? "Posting..." : isUploading ? "Uploading..." : "Post Reel"}
+                {createReel.isPending ? "Post ho raha hai..." : isUploading ? "Upload ho raha hai..." : "Reel Post Karein"}
               </Button>
             </div>
           </form>

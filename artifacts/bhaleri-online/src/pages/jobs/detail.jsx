@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
-import { useGetJob } from "@/lib/api";
+import { useGetJob, useApplyToJob, useCheckApplied } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,24 +21,31 @@ export default function JobDetail() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { data: job, isLoading, error } = useGetJob(id, { enabled: !!id });
+  const applyToJob = useApplyToJob();
+  const { data: appliedData, refetch: refetchApplied } = useCheckApplied(id, { enabled: !!id && !!user });
 
   const [showApply, setShowApply] = useState(false);
-  const [applied, setApplied] = useState(false);
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [message, setMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+
+  const applied = appliedData?.applied ?? false;
 
   const handleApply = (e) => {
     e.preventDefault();
     if (!name || !phone) { toast({ title: "Name and phone are required", variant: "destructive" }); return; }
-    setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      setApplied(true);
-      setShowApply(false);
-      toast({ title: "Application submitted!", description: `Your application has been sent to the employer. They will contact you on ${phone}.` });
-    }, 1200);
+    if (!user) { toast({ title: "Please login to apply", variant: "destructive" }); return; }
+    applyToJob.mutate(
+      { id, data: { applicantName: name, applicantPhone: phone, message: message || undefined } },
+      {
+        onSuccess: () => {
+          toast({ title: "Application submitted!", description: `The employer will contact you on ${phone}.` });
+          setShowApply(false);
+          refetchApplied();
+        },
+        onError: (err) => toast({ title: "Failed to apply", description: err.message, variant: "destructive" }),
+      }
+    );
   };
 
   if (isLoading) return (
@@ -59,7 +66,6 @@ export default function JobDetail() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Back */}
       <Link href="/jobs">
         <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm group">
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" /> Back to Jobs
@@ -104,7 +110,6 @@ export default function JobDetail() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Description */}
         <div className="md:col-span-2 space-y-4">
           {job.description && (
             <Card>
@@ -128,7 +133,6 @@ export default function JobDetail() {
           )}
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-4">
           <Card className="border-t-4 border-t-indigo-500 shadow-sm">
             <CardContent className="p-5 space-y-4">
@@ -144,7 +148,13 @@ export default function JobDetail() {
                   </div>
                 </div>
               )}
-              {!applied ? (
+              {!user ? (
+                <Link href="/login">
+                  <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
+                    <Send className="w-4 h-4 mr-2" /> Login to Apply
+                  </Button>
+                </Link>
+              ) : !applied ? (
                 <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={() => setShowApply(true)}>
                   <Send className="w-4 h-4 mr-2" /> Apply Now
                 </Button>
@@ -193,9 +203,9 @@ export default function JobDetail() {
                 </div>
                 <div className="flex gap-3 pt-1">
                   <Button type="button" variant="outline" className="flex-1" onClick={() => setShowApply(false)}>Cancel</Button>
-                  <Button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-700" disabled={submitting}>
+                  <Button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-700" disabled={applyToJob.isPending}>
                     <Send className="w-4 h-4 mr-2" />
-                    {submitting ? "Submitting..." : "Submit Application"}
+                    {applyToJob.isPending ? "Submitting..." : "Submit Application"}
                   </Button>
                 </div>
               </form>

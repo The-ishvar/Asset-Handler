@@ -593,6 +593,84 @@ export function useDeleteShopItem() {
   });
 }
 
+// ─── Job Applications ────────────────────────────────────────────────────────
+export function useApplyToJob() {
+  return useMutation({
+    mutationFn: ({ id, data }) => api.post(`/jobs/${id}/apply`, data).then((r) => r.data),
+  });
+}
+
+export function useCheckApplied(jobId, options = {}) {
+  return useQuery({
+    queryKey: ["jobApplied", jobId],
+    queryFn: () => api.get(`/jobs/${jobId}/applied`).then((r) => r.data),
+    enabled: !!jobId,
+    ...options,
+  });
+}
+
+export function useGetJobApplications(jobId, options = {}) {
+  return useQuery({
+    queryKey: ["jobApplications", jobId],
+    queryFn: () => api.get(`/jobs/${jobId}/applications`).then((r) => r.data),
+    enabled: !!jobId,
+    ...options,
+  });
+}
+
+// ─── Posts ───────────────────────────────────────────────────────────────────
+export function useListPosts(options = {}) {
+  return useQuery({
+    queryKey: ["listPosts"],
+    queryFn: () => api.get("/posts").then((r) => r.data),
+    ...options,
+  });
+}
+
+export function useCreatePost() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.post("/posts", data).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["listPosts"] }),
+  });
+}
+
+export function useDeletePost() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.delete(`/posts/${id}`).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["listPosts"] }),
+  });
+}
+
+export function useLikePost() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.post(`/posts/${id}/like`).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["listPosts"] }),
+  });
+}
+
+export function useGetPostComments(postId, options = {}) {
+  return useQuery({
+    queryKey: ["postComments", postId],
+    queryFn: () => api.get(`/posts/${postId}/comments`).then((r) => r.data),
+    enabled: !!postId,
+    ...options,
+  });
+}
+
+export function useAddPostComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, content }) => api.post(`/posts/${id}/comments`, { content }).then((r) => r.data),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["postComments", vars.id] });
+      qc.invalidateQueries({ queryKey: ["listPosts"] });
+    },
+  });
+}
+
 // ─── Stats ───────────────────────────────────────────────────────────────────
 export function useGetDashboardStats(options = {}) {
   return useQuery({

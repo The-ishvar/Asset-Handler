@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { useListListings, useListReels, usePatchMyProfile, useUpdateUser } from "@/lib/api";
+import { useListListings, useListReels, usePatchMyProfile, useUpdateUser, useGetUserProfile } from "@/lib/api";
 import { useLocation, Link } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ export default function Profile() {
     { userId: user?.id },
     { enabled: !!user?.id }
   );
+  const { data: profile } = useGetUserProfile(user?.id, { enabled: !!user?.id });
 
   const updateUser = useUpdateUser();
   const patchProfile = usePatchMyProfile();
@@ -119,6 +120,14 @@ export default function Profile() {
             {user.phone && <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" /> {user.phone}</span>}
           </div>
           <div className="flex gap-5 pt-2 text-sm">
+            <div className="text-center">
+              <div className="font-bold">{profile?.followerCount ?? 0}</div>
+              <div className="text-muted-foreground text-xs">Followers</div>
+            </div>
+            <div className="text-center">
+              <div className="font-bold">{profile?.followingCount ?? 0}</div>
+              <div className="text-muted-foreground text-xs">Following</div>
+            </div>
             <div className="text-center">
               <div className="font-bold">{myListings?.length ?? 0}</div>
               <div className="text-muted-foreground text-xs">Listings</div>

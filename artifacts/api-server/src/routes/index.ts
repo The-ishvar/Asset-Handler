@@ -19,6 +19,8 @@ import notificationsRouter from "./notifications";
 import messagesRouter from "./messages";
 import cartRouter from "./cart";
 import userShopsRouter from "./user-shops";
+import jobApplicationsRouter from "./job-applications";
+import postsRouter from "./posts";
 
 const router: IRouter = Router();
 
@@ -38,6 +40,8 @@ router.use("/emergency", emergencyRouter);
 router.use("/stats", statsRouter);
 router.use("/reels", reelsRouter);
 router.use(socialRouter);
+router.use(jobApplicationsRouter);
+router.use(postsRouter);
 router.use("/notifications", notificationsRouter);
 router.use("/messages", messagesRouter);
 router.use("/cart", cartRouter);

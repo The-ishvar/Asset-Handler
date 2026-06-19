@@ -26,6 +26,7 @@ import ShopDetail from "@/pages/shops/detail";
 import BusList from "@/pages/buses/index";
 import JobsList from "@/pages/jobs/index";
 import JobDetail from "@/pages/jobs/detail";
+import NewJob from "@/pages/jobs/new";
 import EventsList from "@/pages/events/index";
 import NoticesList from "@/pages/notices/index";
 import EmergencyList from "@/pages/emergency/index";
@@ -43,6 +44,7 @@ import PublicProfile from "@/pages/profile/id";
 import CartPage from "@/pages/cart/index";
 import MyShopPage from "@/pages/my-shop/index";
 import ShopView from "@/pages/my-shop/shop";
+import PostsPage from "@/pages/posts/index";
 
 import AdminDashboard from "@/pages/admin/index";
 import AdminUsers from "@/pages/admin/users";
@@ -115,6 +117,7 @@ function Router() {
 
             <Route path="/buses" component={BusList} />
             <Route path="/jobs" component={JobsList} />
+            <Route path="/jobs/new" component={NewJob} />
             <Route path="/jobs/:id" component={JobDetail} />
             <Route path="/events" component={EventsList} />
             <Route path="/notices" component={NoticesList} />
@@ -134,6 +137,7 @@ function Router() {
             <Route path="/cart" component={CartPage} />
             <Route path="/my-shop" component={MyShopPage} />
             <Route path="/shop/:id" component={ShopView} />
+            <Route path="/posts" component={PostsPage} />
 
             <Route component={NotFound} />
           </Switch>

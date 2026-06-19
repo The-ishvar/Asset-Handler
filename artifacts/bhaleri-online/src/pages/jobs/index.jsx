@@ -23,10 +23,16 @@ export default function JobsList() {
             <p className="text-muted-foreground">Local employment opportunities</p>
           </div>
         </div>
-        {(user?.role === "admin" || user?.role === "super_admin") && (
-          <Link href="/admin/jobs">
+        {user ? (
+          <Link href="/jobs/new">
             <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
-              <PlusCircle className="w-4 h-4 mr-2" /> Post a Job
+              <PlusCircle className="w-4 h-4 mr-2" /> Job Post Karein
+            </Button>
+          </Link>
+        ) : (
+          <Link href="/login">
+            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              <PlusCircle className="w-4 h-4 mr-2" /> Job Post Karein
             </Button>
           </Link>
         )}
