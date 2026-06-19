@@ -308,6 +308,15 @@ export function useDeleteBus() {
 }
 
 // ─── Jobs ────────────────────────────────────────────────────────────────────
+export function useGetJob(id, options = {}) {
+  return useQuery({
+    queryKey: ["getJob", id],
+    queryFn: () => api.get(`/jobs/${id}`).then((r) => r.data),
+    enabled: !!id,
+    ...options,
+  });
+}
+
 export function useListJobs(options = {}) {
   return useQuery({
     queryKey: ["listJobs"],

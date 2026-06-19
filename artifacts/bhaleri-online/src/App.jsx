@@ -25,6 +25,7 @@ import ShopsList from "@/pages/shops/index";
 import ShopDetail from "@/pages/shops/detail";
 import BusList from "@/pages/buses/index";
 import JobsList from "@/pages/jobs/index";
+import JobDetail from "@/pages/jobs/detail";
 import EventsList from "@/pages/events/index";
 import NoticesList from "@/pages/notices/index";
 import EmergencyList from "@/pages/emergency/index";
@@ -106,6 +107,7 @@ function Router() {
 
             <Route path="/buses" component={BusList} />
             <Route path="/jobs" component={JobsList} />
+            <Route path="/jobs/:id" component={JobDetail} />
             <Route path="/events" component={EventsList} />
             <Route path="/notices" component={NoticesList} />
             <Route path="/emergency" component={EmergencyList} />

@@ -6,6 +6,7 @@ import {
   Calendar, Bell, AlertTriangle, MapPin, Info, ArrowRight, Film,
 } from "lucide-react";
 import { useListEvents, useListNotices } from "@/lib/api";
+import AdsSection from "@/components/ads-section";
 
 const sections = [
   { name: "Shops",       path: "/shops",     icon: Store,         bg: "#2563EB" },
@@ -137,6 +138,8 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      <AdsSection max={3} title="Local Advertisements" />
 
       <section>
         <Link href="/emergency">

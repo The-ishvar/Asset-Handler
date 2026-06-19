@@ -26,6 +26,12 @@ router.get("/", async (req, res) => {
   res.json(rows.map(fmt));
 });
 
+router.get("/:id", async (req, res) => {
+  const [row] = await db.select().from(jobsTable).where(eq(jobsTable.id, parseInt(req.params.id as string))).limit(1);
+  if (!row) { res.status(404).json({ error: "Not found" }); return; }
+  res.json(fmt(row));
+});
+
 router.post("/", requireAdmin, async (req, res) => {
   const { title, company, type, location, salary, contactPhone, contactNumber, description } = req.body;
   if (!title) { res.status(400).json({ error: "title required" }); return; }

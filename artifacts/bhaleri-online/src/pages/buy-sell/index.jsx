@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth";
+import AdsSection from "@/components/ads-section";
 
 const CATEGORIES = ["All","Electronics","Vehicles","Furniture","Clothes","Agriculture","Land / Property","Books","Other"];
 const SORT_OPTIONS = [
@@ -114,6 +115,8 @@ export default function BuySellList() {
           </div>
         </div>
       )}
+
+      <AdsSection max={2} title="Sponsored" />
 
       {!isLoading && listings && (
         <p className="text-sm text-muted-foreground">Showing <strong>{filteredListings.length}</strong> of <strong>{listings.length}</strong> listings</p>
