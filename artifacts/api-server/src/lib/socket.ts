@@ -4,6 +4,9 @@ import { logger } from "./logger";
 
 let io: IOServer | null = null;
 
+// Track online users: userId -> Set of socketIds
+const onlineUsers = new Map<number, Set<string>>();
+
 export function initSocket(httpServer: HttpServer): IOServer {
   io = new IOServer(httpServer, {
     cors: {
@@ -15,11 +18,24 @@ export function initSocket(httpServer: HttpServer): IOServer {
 
   io.on("connection", (socket) => {
     logger.info({ socketId: socket.id }, "Socket connected");
+    let joinedUserId: number | null = null;
 
     // Join a user room for targeted events
     socket.on("join", (userId: string | number) => {
-      socket.join(`user:${userId}`);
-      logger.info({ socketId: socket.id, userId }, "Socket joined user room");
+      const uid = Number(userId);
+      joinedUserId = uid;
+      socket.join(`user:${uid}`);
+      logger.info({ socketId: socket.id, userId: uid }, "Socket joined user room");
+
+      // Track online
+      if (!onlineUsers.has(uid)) onlineUsers.set(uid, new Set());
+      onlineUsers.get(uid)!.add(socket.id);
+
+      // Broadcast to everyone that this user is online
+      io!.emit("user:online", { userId: uid });
+
+      // Send current online list to this new socket
+      socket.emit("online:list", Array.from(onlineUsers.keys()));
     });
 
     // Join a conversation room
@@ -42,6 +58,17 @@ export function initSocket(httpServer: HttpServer): IOServer {
 
     socket.on("disconnect", () => {
       logger.info({ socketId: socket.id }, "Socket disconnected");
+      if (joinedUserId !== null) {
+        const sockets = onlineUsers.get(joinedUserId);
+        if (sockets) {
+          sockets.delete(socket.id);
+          if (sockets.size === 0) {
+            onlineUsers.delete(joinedUserId);
+            // Broadcast offline
+            io!.emit("user:offline", { userId: joinedUserId });
+          }
+        }
+      }
     });
   });
 
@@ -58,4 +85,12 @@ export function emitToUser(userId: number, event: string, data: unknown): void {
 
 export function emitToConversation(conversationId: string, event: string, data: unknown): void {
   io?.to(`conversation:${conversationId}`).emit(event, data);
+}
+
+export function isUserOnline(userId: number): boolean {
+  return onlineUsers.has(userId) && (onlineUsers.get(userId)?.size ?? 0) > 0;
+}
+
+export function getOnlineUserIds(): number[] {
+  return Array.from(onlineUsers.keys());
 }

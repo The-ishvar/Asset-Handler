@@ -6,9 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Check, CheckCheck } from "lucide-react";
 import { Link } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
+import { getSocket, connectSocket } from "@/lib/socket";
 
 export default function Conversation() {
   const [, params] = useRoute("/messages/:userId");
@@ -18,12 +19,55 @@ export default function Conversation() {
   const qc = useQueryClient();
   const [text, setText] = useState("");
   const bottomRef = useRef(null);
+  const [isOtherOnline, setIsOtherOnline] = useState(false);
 
   const { data: messages, isLoading } = useGetConversation(otherId, { enabled: !!user && !!otherId, refetchInterval: 5000 });
   const { data: otherUser } = useGetUser(otherId, { enabled: !!otherId });
   const sendMsg = useSendMessage();
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  // Socket.IO: connect, track online status, read receipts
+  useEffect(() => {
+    if (!user) return;
+    const socket = connectSocket(user.id);
+
+    // Get current online list
+    socket.on("online:list", (onlineIds) => {
+      setIsOtherOnline(onlineIds.includes(otherId));
+    });
+
+    socket.on("user:online", ({ userId }) => {
+      if (userId === otherId) setIsOtherOnline(true);
+    });
+
+    socket.on("user:offline", ({ userId }) => {
+      if (userId === otherId) setIsOtherOnline(false);
+    });
+
+    // Real-time new message from other person
+    socket.on("message:new", (msg) => {
+      if (msg.senderId === otherId) {
+        qc.invalidateQueries({ queryKey: ["getConversation", otherId] });
+        qc.invalidateQueries({ queryKey: ["listConversations"] });
+      }
+    });
+
+    // Other person read our messages
+    socket.on("message:read", ({ readBy }) => {
+      if (readBy === otherId) {
+        qc.invalidateQueries({ queryKey: ["getConversation", otherId] });
+      }
+    });
+
+    return () => {
+      socket.off("online:list");
+      socket.off("user:online");
+      socket.off("user:offline");
+      socket.off("message:new");
+      socket.off("message:read");
+    };
+  }, [user, otherId, qc]);
 
   if (!user) { setLocation("/login"); return null; }
 
@@ -40,13 +84,24 @@ export default function Conversation() {
     <div className="max-w-2xl mx-auto flex flex-col" style={{ height: "calc(100vh - 56px - 64px)" }}>
       <div className="flex items-center gap-3 py-3 border-b shrink-0">
         <Link href="/messages"><Button variant="ghost" size="icon"><ArrowLeft className="w-5 h-5" /></Button></Link>
-        <Avatar className="w-9 h-9">
-          <AvatarImage src={otherUser?.avatarUrl || ""} />
-          <AvatarFallback>{(otherUser?.name || "?").charAt(0)}</AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="w-9 h-9">
+            <AvatarImage src={otherUser?.avatarUrl || ""} />
+            <AvatarFallback>{(otherUser?.name || "?").charAt(0)}</AvatarFallback>
+          </Avatar>
+          {isOtherOnline && (
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-background rounded-full" />
+          )}
+        </div>
         <div>
           <div className="font-semibold text-sm">{otherUser?.name || "User"}</div>
-          <div className="text-xs text-muted-foreground">{otherUser?.phone || ""}</div>
+          <div className="text-xs text-muted-foreground">
+            {isOtherOnline ? (
+              <span className="text-green-500 font-medium">Online</span>
+            ) : (
+              otherUser?.phone || ""
+            )}
+          </div>
         </div>
       </div>
 
@@ -68,9 +123,18 @@ export default function Conversation() {
               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm ${isMe ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted rounded-bl-sm"}`}>
                   <p>{msg.content}</p>
-                  <p className={`text-xs mt-1 ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                    {new Date(msg.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
-                  </p>
+                  <div className={`flex items-center gap-1 mt-1 ${isMe ? "justify-end" : "justify-start"}`}>
+                    <span className={`text-xs ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                      {new Date(msg.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                    {isMe && (
+                      msg.isRead ? (
+                        <CheckCheck className="w-3.5 h-3.5 text-blue-300" />
+                      ) : (
+                        <Check className="w-3.5 h-3.5 text-primary-foreground/60" />
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
             );

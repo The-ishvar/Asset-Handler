@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { messagesTable, usersTable, notificationsTable } from "@workspace/db";
-import { eq, or, and, desc, sql } from "drizzle-orm";
+import { eq, or, and, desc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { emitToUser } from "../lib/socket";
 
 const router = Router();
 
@@ -14,19 +15,16 @@ function fmt(m: typeof messagesTable.$inferSelect) {
 router.get("/", requireAuth, async (req, res) => {
   const userId = req.user!.userId;
 
-  // Get all messages involving this user
   const allMessages = await db.select().from(messagesTable)
     .where(or(eq(messagesTable.senderId, userId), eq(messagesTable.receiverId, userId)))
     .orderBy(desc(messagesTable.createdAt));
 
-  // Build conversation map (other user's id -> last message)
   const convMap = new Map<number, typeof allMessages[number]>();
   for (const msg of allMessages) {
     const otherId = msg.senderId === userId ? msg.receiverId : msg.senderId;
     if (!convMap.has(otherId)) convMap.set(otherId, msg);
   }
 
-  // Fetch other users' info
   const conversations = await Promise.all(
     Array.from(convMap.entries()).map(async ([otherId, lastMsg]) => {
       const [other] = await db.select().from(usersTable).where(eq(usersTable.id, otherId)).limit(1);
@@ -62,9 +60,15 @@ router.get("/:userId", requireAuth, async (req, res) => {
     .orderBy(messagesTable.createdAt);
 
   // Mark messages from other user as read
-  await db.update(messagesTable)
-    .set({ isRead: true })
-    .where(and(eq(messagesTable.senderId, otherId), eq(messagesTable.receiverId, myId)));
+  const unreadFromOther = msgs.filter(m => m.senderId === otherId && !m.isRead);
+  if (unreadFromOther.length > 0) {
+    await db.update(messagesTable)
+      .set({ isRead: true })
+      .where(and(eq(messagesTable.senderId, otherId), eq(messagesTable.receiverId, myId)));
+
+    // Notify the sender that their messages were read
+    emitToUser(otherId, "message:read", { readBy: myId, conversationWith: myId });
+  }
 
   res.json(msgs.map(fmt));
 });
@@ -93,6 +97,9 @@ router.post("/", requireAuth, async (req, res) => {
     fromUserAvatar: sender?.avatarUrl,
     link: `/messages/${req.user!.userId}`,
   });
+
+  // Emit new message to receiver in real-time
+  emitToUser(parseInt(String(receiverId)), "message:new", fmt(msg));
 
   res.status(201).json(fmt(msg));
 });
