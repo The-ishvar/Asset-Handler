@@ -53,7 +53,7 @@ function UserCard({ person, currentUser }) {
             <Link href={`/profile/${person.id}`}>
               <div className="font-semibold hover:text-primary cursor-pointer truncate">{person.name}</div>
             </Link>
-            {person.phone && (
+            {person.phone && (currentUser?.id === person.id || currentUser?.role === "admin" || currentUser?.role === "super_admin") && (
               <div className="text-xs text-muted-foreground">📱 {person.phone}</div>
             )}
           </div>

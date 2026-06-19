@@ -101,7 +101,7 @@ export default function PublicProfile() {
             {profile.role === "super_admin" && <Badge className="bg-purple-100 text-purple-800">Super Admin</Badge>}
           </div>
           {profile.bio && <p className="text-muted-foreground text-sm">{profile.bio}</p>}
-          {profile.phone && (
+          {profile.phone && (isOwnProfile || user?.role === "admin" || user?.role === "super_admin") && (
             <div className="flex gap-2 text-sm text-muted-foreground">
               <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" /> {profile.phone}</span>
             </div>
