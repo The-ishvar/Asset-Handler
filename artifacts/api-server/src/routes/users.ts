@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, ilike, or } from "drizzle-orm";
 import { requireAdmin, requireAuth } from "../middlewares/auth";
 
 const router = Router();
@@ -17,6 +17,20 @@ function formatUser(user: typeof usersTable.$inferSelect) {
     createdAt: user.createdAt.toISOString(),
   };
 }
+
+// Search users (public - for finding people to snap/follow)
+router.get("/search", async (req, res) => {
+  try {
+    const q = (req.query.q as string || "").trim();
+    if (!q || q.length < 2) return res.json([]);
+    const users = await db.select().from(usersTable)
+      .where(or(ilike(usersTable.name, `%${q}%`), ilike(usersTable.phone, `%${q}%`)))
+      .limit(20);
+    res.json(users.map(formatUser));
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 router.get("/", requireAdmin, async (req, res) => {
   const users = await db.select().from(usersTable).orderBy(usersTable.createdAt);

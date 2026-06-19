@@ -687,3 +687,62 @@ export function useGetRecentActivity(options = {}) {
     ...options,
   });
 }
+
+// ─── User Search ──────────────────────────────────────────────────────────────
+export function useSearchUsers(query, options = {}) {
+  return useQuery({
+    queryKey: ["searchUsers", query],
+    queryFn: () => api.get(`/users/search?q=${encodeURIComponent(query)}`).then((r) => r.data),
+    enabled: !!query && query.length >= 2,
+    ...options,
+  });
+}
+
+// ─── Snaps ────────────────────────────────────────────────────────────────────
+export function useGetSnapInbox(options = {}) {
+  return useQuery({
+    queryKey: ["snapInbox"],
+    queryFn: () => api.get("/snaps/inbox").then((r) => r.data),
+    refetchInterval: 15000,
+    ...options,
+  });
+}
+
+export function useGetSnapSent(options = {}) {
+  return useQuery({
+    queryKey: ["snapSent"],
+    queryFn: () => api.get("/snaps/sent").then((r) => r.data),
+    ...options,
+  });
+}
+
+export function useSendSnap() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.post("/snaps", data).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["snapInbox"] });
+      qc.invalidateQueries({ queryKey: ["snapSent"] });
+    },
+  });
+}
+
+export function useViewSnap() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.post(`/snaps/${id}/view`).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["snapInbox"] });
+    },
+  });
+}
+
+export function useDeleteSnap() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.delete(`/snaps/${id}`).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["snapSent"] });
+    },
+  });
+}

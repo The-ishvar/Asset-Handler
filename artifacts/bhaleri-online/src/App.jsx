@@ -45,6 +45,7 @@ import CartPage from "@/pages/cart/index";
 import MyShopPage from "@/pages/my-shop/index";
 import ShopView from "@/pages/my-shop/shop";
 import PostsPage from "@/pages/posts/index";
+import SnapsPage from "@/pages/snaps/index";
 
 import AdminDashboard from "@/pages/admin/index";
 import AdminUsers from "@/pages/admin/users";
@@ -136,6 +137,7 @@ function Router() {
 
             <Route path="/cart" component={CartPage} />
             <Route path="/my-shop" component={MyShopPage} />
+            <Route path="/snaps" component={SnapsPage} />
             <Route path="/shop/:id" component={ShopView} />
             <Route path="/posts" component={PostsPage} />
 

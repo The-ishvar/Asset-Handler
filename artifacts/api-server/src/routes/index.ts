@@ -21,6 +21,7 @@ import cartRouter from "./cart";
 import userShopsRouter from "./user-shops";
 import jobApplicationsRouter from "./job-applications";
 import postsRouter from "./posts";
+import snapsRouter from "./snaps";
 
 const router: IRouter = Router();
 
@@ -42,6 +43,7 @@ router.use("/reels", reelsRouter);
 router.use(socialRouter);
 router.use(jobApplicationsRouter);
 router.use(postsRouter);
+router.use(snapsRouter);
 router.use("/notifications", notificationsRouter);
 router.use("/messages", messagesRouter);
 router.use("/cart", cartRouter);
