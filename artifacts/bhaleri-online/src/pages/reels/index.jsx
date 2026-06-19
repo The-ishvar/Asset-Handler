@@ -20,7 +20,7 @@ function ReelCard({ reel, isActive }) {
   const [commentText, setCommentText] = useState("");
   const [liked, setLiked] = useState(reel.isLiked);
   const [likeCount, setLikeCount] = useState(reel.likeCount);
-  const [viewRecorded, setViewRecorded] = useState(false);
+  const viewRecordedRef = useRef(false);
 
   const toggleLike = useToggleReelLike();
   const recordView = useRecordReelView();
@@ -32,11 +32,11 @@ function ReelCard({ reel, isActive }) {
     if (!video) return;
     if (isActive) {
       video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-      if (!viewRecorded) { recordView.mutate({ id: reel.id }); setViewRecorded(true); }
+      if (!viewRecordedRef.current) { recordView.mutate({ id: reel.id }); viewRecordedRef.current = true; }
     } else {
       video.pause(); setPlaying(false);
     }
-  }, [isActive]);
+  }, [isActive, recordView, reel.id]);
 
   const togglePlay = () => {
     const video = videoRef.current;

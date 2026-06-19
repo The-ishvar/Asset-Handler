@@ -9,7 +9,7 @@ import { MessageCircle } from "lucide-react";
 export default function Messages() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const { data: conversations, isLoading } = useListConversations({ enabled: !!user, refetchInterval: 10000 });
+  const { data: conversations, isLoading } = useListConversations({ enabled: !!user, refetchInterval: 15000, refetchIntervalInBackground: false });
 
   if (!user) { setLocation("/login"); return null; }
 

@@ -17,7 +17,8 @@ export default function Layout({ children }) {
 
   const { data: notifications } = useListNotifications({
     enabled: !!user,
-    refetchInterval: 30000,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
   });
   const unreadCount = notifications?.filter((n) => !n.isRead).length ?? 0;
 

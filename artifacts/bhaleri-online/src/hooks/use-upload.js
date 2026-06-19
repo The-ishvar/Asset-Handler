@@ -1,10 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { getAuthToken } from "@/lib/api";
 
 export function useUpload({ onSuccess, onError } = {}) {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  onSuccessRef.current = onSuccess;
+  onErrorRef.current = onError;
 
   const uploadFile = useCallback(async (file) => {
     setIsUploading(true);
@@ -44,16 +48,16 @@ export function useUpload({ onSuccess, onError } = {}) {
 
       setProgress(100);
       const result = { objectPath, objectUrl: `/api/storage${objectPath}` };
-      onSuccess?.(result);
+      onSuccessRef.current?.(result);
       return result;
     } catch (err) {
       setError(err);
-      onError?.(err);
+      onErrorRef.current?.(err);
       return null;
     } finally {
       setIsUploading(false);
     }
-  }, [onSuccess, onError]);
+  }, []);
 
   return { uploadFile, isUploading, progress, error };
 }

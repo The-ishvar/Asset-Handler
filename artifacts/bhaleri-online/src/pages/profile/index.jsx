@@ -199,7 +199,7 @@ export default function Profile() {
                 <Link key={listing.id} href={`/buy-sell/${listing.id}`}>
                   <div className="flex gap-4 p-4 border rounded-xl hover:bg-muted/20 transition-colors cursor-pointer">
                     <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden shrink-0">
-                      {listing.photoUrl ? <img src={listing.photoUrl} alt={listing.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground/30" /></div>}
+                      {(() => { let ph = listing.photoUrl; try { const a = JSON.parse(ph); ph = Array.isArray(a) ? a[0] : ph; } catch {} return ph ? <img src={ph} alt={listing.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Package className="w-6 h-6 text-muted-foreground/30" /></div>; })()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-2">
