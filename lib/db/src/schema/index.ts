@@ -20,3 +20,4 @@ export * from "./job_applications";
 export * from "./posts";
 export * from "./snaps";
 export * from "./stories";
+export * from "./bookings";

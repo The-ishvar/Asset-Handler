@@ -3,7 +3,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
 export const notificationTypeEnum = pgEnum("notification_type", [
-  "follow", "like", "comment", "message", "listing"
+  "follow", "like", "comment", "message", "listing", "booking"
 ]);
 
 export const notificationsTable = pgTable("notifications", {

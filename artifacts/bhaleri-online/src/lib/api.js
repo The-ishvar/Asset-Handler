@@ -747,6 +747,78 @@ export function useDeleteSnap() {
   });
 }
 
+// ─── Bookings ─────────────────────────────────────────────────────────────────
+export function useMyBookings(type, options = {}) {
+  return useQuery({
+    queryKey: ["myBookings", type],
+    queryFn: () => api.get("/bookings/mine", { params: type ? { type } : {} }).then((r) => r.data),
+    ...options,
+  });
+}
+
+export function useGetBooking(id, options = {}) {
+  return useQuery({
+    queryKey: ["getBooking", id],
+    queryFn: () => api.get(`/bookings/${id}`).then((r) => r.data),
+    enabled: !!id,
+    ...options,
+  });
+}
+
+export function useCreateBooking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.post("/bookings", data).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["myBookings"] });
+    },
+  });
+}
+
+export function useCancelBooking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.delete(`/bookings/${id}`).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["myBookings"] }),
+  });
+}
+
+export function useUpdateBookingStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status, note }) =>
+      api.patch(`/bookings/${id}/status`, { status, note }).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["myBookings"] });
+      qc.invalidateQueries({ queryKey: ["providerBookings"] });
+    },
+  });
+}
+
+export function useProviderDashboard(options = {}) {
+  return useQuery({
+    queryKey: ["providerBookings"],
+    queryFn: () => api.get("/bookings/provider").then((r) => r.data),
+    ...options,
+  });
+}
+
+export function useProviderEarnings(options = {}) {
+  return useQuery({
+    queryKey: ["providerEarnings"],
+    queryFn: () => api.get("/bookings/provider/earnings").then((r) => r.data),
+    ...options,
+  });
+}
+
+export function useListProviders(type, options = {}) {
+  return useQuery({
+    queryKey: ["listProviders", type],
+    queryFn: () => api.get("/bookings/providers/list", { params: type ? { type } : {} }).then((r) => r.data),
+    ...options,
+  });
+}
+
 // ─── Stories ──────────────────────────────────────────────────────────────────
 export function useListStories(options = {}) {
   return useQuery({

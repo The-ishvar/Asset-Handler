@@ -46,6 +46,11 @@ import MyShopPage from "@/pages/my-shop/index";
 import ShopView from "@/pages/my-shop/shop";
 import PostsPage from "@/pages/posts/index";
 import SnapsPage from "@/pages/snaps/index";
+import BookAuto from "@/pages/book/auto";
+import BookBus from "@/pages/book/bus";
+import BookEvent from "@/pages/book/event";
+import BookMedical from "@/pages/book/medical";
+import ProviderDashboard from "@/pages/provider/index";
 
 import AdminDashboard from "@/pages/admin/index";
 import AdminUsers from "@/pages/admin/users";
@@ -140,6 +145,12 @@ function Router() {
             <Route path="/snaps" component={SnapsPage} />
             <Route path="/shop/:id" component={ShopView} />
             <Route path="/posts" component={PostsPage} />
+
+            <Route path="/book/auto" component={BookAuto} />
+            <Route path="/book/bus" component={BookBus} />
+            <Route path="/book/event" component={BookEvent} />
+            <Route path="/book/medical" component={BookMedical} />
+            <Route path="/provider" component={ProviderDashboard} />
 
             <Route component={NotFound} />
           </Switch>

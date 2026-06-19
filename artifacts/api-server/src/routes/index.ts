@@ -23,6 +23,7 @@ import jobApplicationsRouter from "./job-applications";
 import postsRouter from "./posts";
 import snapsRouter from "./snaps";
 import storiesRouter from "./stories";
+import bookingsRouter from "./bookings";
 
 const router: IRouter = Router();
 
@@ -50,5 +51,6 @@ router.use("/messages", messagesRouter);
 router.use("/cart", cartRouter);
 router.use("/user-shops", userShopsRouter);
 router.use("/stories", storiesRouter);
+router.use("/bookings", bookingsRouter);
 
 export default router;

@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Settings, LogOut, Shield, Plus, Play, Edit3, Phone, Mail } from "lucide-react";
+import { Package, Settings, LogOut, Shield, Plus, Play, Edit3, Phone, Mail, CalendarClock } from "lucide-react";
+import MyBookings from "@/components/booking/MyBookings";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
@@ -178,14 +179,17 @@ export default function Profile() {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full rounded-none border-b bg-transparent h-auto p-0 justify-start">
-          <TabsTrigger value="listings" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm">
+        <TabsList className="w-full rounded-none border-b bg-transparent h-auto p-0 justify-start overflow-x-auto flex-nowrap">
+          <TabsTrigger value="listings" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm shrink-0">
             <Package className="w-4 h-4 mr-1.5" /> Listings
           </TabsTrigger>
-          <TabsTrigger value="reels" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm">
+          <TabsTrigger value="reels" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm shrink-0">
             <Play className="w-4 h-4 mr-1.5" /> Reels
           </TabsTrigger>
-          <TabsTrigger value="settings" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm">
+          <TabsTrigger value="bookings" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm shrink-0">
+            <CalendarClock className="w-4 h-4 mr-1.5" /> Bookings
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm shrink-0">
             <Settings className="w-4 h-4 mr-1.5" /> Settings
           </TabsTrigger>
         </TabsList>
@@ -249,6 +253,14 @@ export default function Profile() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="bookings" className="p-4 mt-0">
+          <div className="mb-4">
+            <h3 className="font-semibold">My Bookings</h3>
+            <p className="text-sm text-muted-foreground">View and manage your ride, bus, event and medical bookings.</p>
+          </div>
+          <MyBookings />
         </TabsContent>
 
         <TabsContent value="settings" className="p-4 mt-0">

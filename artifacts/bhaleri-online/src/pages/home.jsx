@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth";
 import {
   School, Stethoscope, Store, Bus, ShoppingBag, Briefcase,
   Calendar, Bell, AlertTriangle, MapPin, Info, ArrowRight, Film,
-  Users, MessageSquare, Camera, Search, UserSearch, Newspaper,
+  Users, MessageSquare, Camera, Search, UserSearch, Newspaper, Car, Ticket,
 } from "lucide-react";
 import { useListEvents, useListNotices, useListPosts } from "@/lib/api";
 import AdsSection from "@/components/ads-section";
@@ -14,18 +14,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 
 const sections = [
-  { name: "Posts",       path: "/posts",     icon: Newspaper,     bg: "#2563EB" },
-  { name: "Shops",       path: "/shops",     icon: Store,         bg: "#16A34A" },
-  { name: "Medical",     path: "/medical",   icon: Stethoscope,   bg: "#DC2626" },
-  { name: "Jobs",        path: "/jobs",      icon: Briefcase,     bg: "#9333EA" },
-  { name: "Schools",     path: "/schools",   icon: School,        bg: "#0891B2" },
-  { name: "Reels",       path: "/reels",     icon: Film,          bg: "#DB2777" },
-  { name: "Marketplace", path: "/buy-sell",  icon: ShoppingBag,   bg: "#EA580C" },
-  { name: "Buses",       path: "/buses",     icon: Bus,           bg: "#CA8A04" },
-  { name: "Events",      path: "/events",    icon: Calendar,      bg: "#0D9488" },
-  { name: "Snaps",       path: "/snaps",     icon: Camera,        bg: "#7C3AED" },
-  { name: "Village Map", path: "/map",       icon: MapPin,        bg: "#475569" },
-  { name: "Emergency",   path: "/emergency", icon: AlertTriangle, bg: "#B91C1C" },
+  { name: "Posts",       path: "/posts",       icon: Newspaper,     bg: "#2563EB" },
+  { name: "Shops",       path: "/shops",       icon: Store,         bg: "#16A34A" },
+  { name: "Book Auto",   path: "/book/auto",   icon: Car,           bg: "#EA580C" },
+  { name: "Book Bus",    path: "/book/bus",    icon: Bus,           bg: "#CA8A04" },
+  { name: "Book Event",  path: "/book/event",  icon: Ticket,        bg: "#0D9488" },
+  { name: "Medical Apt", path: "/book/medical",icon: Stethoscope,   bg: "#DC2626" },
+  { name: "Jobs",        path: "/jobs",        icon: Briefcase,     bg: "#9333EA" },
+  { name: "Schools",     path: "/schools",     icon: School,        bg: "#0891B2" },
+  { name: "Reels",       path: "/reels",       icon: Film,          bg: "#DB2777" },
+  { name: "Marketplace", path: "/buy-sell",    icon: ShoppingBag,   bg: "#7C3AED" },
+  { name: "Events",      path: "/events",      icon: Calendar,      bg: "#0891B2" },
+  { name: "Village Map", path: "/map",         icon: MapPin,        bg: "#475569" },
+  { name: "Snaps",       path: "/snaps",       icon: Camera,        bg: "#DB2777" },
+  { name: "Emergency",   path: "/emergency",   icon: AlertTriangle, bg: "#B91C1C" },
 ];
 
 export default function Home() {
