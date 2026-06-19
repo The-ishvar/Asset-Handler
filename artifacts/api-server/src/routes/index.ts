@@ -22,6 +22,7 @@ import userShopsRouter from "./user-shops";
 import jobApplicationsRouter from "./job-applications";
 import postsRouter from "./posts";
 import snapsRouter from "./snaps";
+import storiesRouter from "./stories";
 
 const router: IRouter = Router();
 
@@ -48,5 +49,6 @@ router.use("/notifications", notificationsRouter);
 router.use("/messages", messagesRouter);
 router.use("/cart", cartRouter);
 router.use("/user-shops", userShopsRouter);
+router.use("/stories", storiesRouter);
 
 export default router;

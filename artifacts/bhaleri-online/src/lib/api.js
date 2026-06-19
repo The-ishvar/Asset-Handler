@@ -746,3 +746,37 @@ export function useDeleteSnap() {
     },
   });
 }
+
+// ─── Stories ──────────────────────────────────────────────────────────────────
+export function useListStories(options = {}) {
+  return useQuery({
+    queryKey: ["listStories"],
+    queryFn: () => api.get("/stories").then((r) => r.data),
+    refetchInterval: 60000,
+    ...options,
+  });
+}
+
+export function useCreateStory() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.post("/stories", data).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["listStories"] }),
+  });
+}
+
+export function useDeleteStory() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.delete(`/stories/${id}`).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["listStories"] }),
+  });
+}
+
+export function useRecordStoryView() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => api.post(`/stories/${id}/view`).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["listStories"] }),
+  });
+}

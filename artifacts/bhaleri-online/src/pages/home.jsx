@@ -5,11 +5,11 @@ import { useAuth } from "@/lib/auth";
 import {
   School, Stethoscope, Store, Bus, ShoppingBag, Briefcase,
   Calendar, Bell, AlertTriangle, MapPin, Info, ArrowRight, Film,
-  Users, MessageSquare, Camera, Search, UserSearch, TrendingUp,
-  Package, Newspaper,
+  Users, MessageSquare, Camera, Search, UserSearch, Newspaper,
 } from "lucide-react";
-import { useListEvents, useListNotices, useGetDashboardStats, useListPosts } from "@/lib/api";
+import { useListEvents, useListNotices, useListPosts } from "@/lib/api";
 import AdsSection from "@/components/ads-section";
+import StoriesSlider from "@/components/stories/StoriesSlider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 
@@ -28,25 +28,10 @@ const sections = [
   { name: "Emergency",   path: "/emergency", icon: AlertTriangle, bg: "#B91C1C" },
 ];
 
-function StatCard({ icon: Icon, label, value, color }) {
-  return (
-    <div className="flex items-center gap-4 bg-card border rounded-2xl px-5 py-4 shadow-sm">
-      <div className="p-3 rounded-xl shrink-0" style={{ backgroundColor: `${color}18` }}>
-        <Icon className="w-6 h-6" style={{ color }} />
-      </div>
-      <div>
-        <div className="text-2xl font-extrabold leading-none" style={{ color }}>{value ?? "—"}</div>
-        <div className="text-xs text-muted-foreground mt-0.5 font-medium">{label}</div>
-      </div>
-    </div>
-  );
-}
-
 export default function Home() {
   const { user } = useAuth();
   const { data: events } = useListEvents();
   const { data: notices } = useListNotices();
-  const { data: stats } = useGetDashboardStats();
   const { data: posts } = useListPosts();
 
   const upcomingEvents = events?.slice(0, 3) ?? [];
@@ -93,18 +78,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Village Stats */}
+      {/* Stories */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-primary" />
-          <h2 className="text-xl font-bold">Bhaleri Stats</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <Camera className="w-4 h-4 text-primary" />
+          <h2 className="text-base font-semibold text-foreground">Stories</h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard icon={Users}     label="Members"    value={stats?.totalUsers}    color="#2563EB" />
-          <StatCard icon={Package}   label="Listings"   value={stats?.totalListings} color="#EA580C" />
-          <StatCard icon={Briefcase} label="Jobs"       value={stats?.totalJobs}     color="#16A34A" />
-          <StatCard icon={Store}     label="Shops"      value={stats?.totalShops}    color="#9333EA" />
-        </div>
+        <StoriesSlider />
       </section>
 
       {/* Quick Access */}
