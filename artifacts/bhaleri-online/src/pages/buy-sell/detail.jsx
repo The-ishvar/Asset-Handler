@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
-import { useGetListing } from "@/lib/api";
+import { useGetListing, useAddToCart, useGetCart, useSendMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, ShoppingBag, User, Calendar, MessageCircle, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { Phone, ShoppingBag, User, Calendar, MessageCircle, ChevronLeft, ChevronRight, ArrowLeft, ShoppingCart, Zap } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 
 function parsePhotos(photoUrl) {
   if (!photoUrl) return [];
@@ -31,7 +34,6 @@ function PhotoGallery({ photos, title }) {
 
   return (
     <div className="space-y-3">
-      {/* Main image */}
       <div className="relative h-[300px] md:h-[440px] rounded-2xl overflow-hidden bg-black/5 border border-border group shadow-lg">
         <img
           src={photos[current]}
@@ -58,8 +60,6 @@ function PhotoGallery({ photos, title }) {
           {current + 1} / {photos.length}
         </div>
       </div>
-
-      {/* Thumbnails */}
       {photos.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-1">
           {photos.map((url, i) => (
@@ -82,7 +82,40 @@ export default function ListingDetail() {
   const [, params] = useRoute("/buy-sell/:id");
   const id = Number(params?.id);
   const { user } = useAuth();
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [, setLocation] = useLocation();
   const { data: listing, isLoading, error } = useGetListing(id, { enabled: !!id });
+  const { data: cartItems } = useGetCart({ enabled: !!user });
+  const addToCart = useAddToCart();
+  const sendMsg = useSendMessage();
+
+  const isInCart = cartItems?.some((i) => i.listingId === id);
+  const isOwnListing = user && listing && listing.userId === user.id;
+
+  const handleBuyNow = () => {
+    if (!user) { setLocation("/login"); return; }
+    // Send a message to seller expressing interest
+    sendMsg.mutate(
+      { receiverId: listing.userId, content: `Hi! I'm interested in buying "${listing.title}" listed at ₹${Number(listing.price).toLocaleString("en-IN")}. Is it still available?` },
+      {
+        onSuccess: () => {
+          toast({ title: "Request sent to seller!", description: "Opening chat with seller..." });
+          setLocation(`/messages/${listing.userId}`);
+        },
+        onError: () => toast({ title: "Could not send message", variant: "destructive" }),
+      }
+    );
+  };
+
+  const handleAddToCart = () => {
+    if (!user) { setLocation("/login"); return; }
+    if (isInCart) { setLocation("/cart"); return; }
+    addToCart.mutate(id, {
+      onSuccess: () => toast({ title: "Added to cart!", description: "View your cart to see all saved items." }),
+      onError: (err) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    });
+  };
 
   if (isLoading) {
     return (
@@ -127,6 +160,36 @@ export default function ListingDetail() {
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">{listing.title}</h1>
           </div>
 
+          {user && !isOwnListing && (
+            <div className="flex gap-3">
+              <Button
+                className="flex-1 bg-purple-600 hover:bg-purple-700"
+                onClick={handleBuyNow}
+                disabled={sendMsg.isPending}
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                {sendMsg.isPending ? "Sending..." : "Buy Now"}
+              </Button>
+              <Button
+                variant={isInCart ? "default" : "outline"}
+                className={isInCart ? "flex-1 bg-green-600 hover:bg-green-700" : "flex-1"}
+                onClick={handleAddToCart}
+                disabled={addToCart.isPending}
+              >
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                {isInCart ? "View Cart" : addToCart.isPending ? "Adding..." : "Add to Cart"}
+              </Button>
+            </div>
+          )}
+
+          {!user && (
+            <div className="flex gap-3">
+              <Link href="/login" className="flex-1">
+                <Button className="w-full bg-purple-600 hover:bg-purple-700"><Zap className="w-4 h-4 mr-2" /> Login to Buy</Button>
+              </Link>
+            </div>
+          )}
+
           <section>
             <h2 className="text-xl font-semibold mb-3 border-b pb-2">Description</h2>
             <div className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
@@ -162,9 +225,9 @@ export default function ListingDetail() {
                   <div className="font-medium">{new Date(listing.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
                 </div>
               </div>
-              {user && listing.userId !== user.id && (
+              {user && !isOwnListing && (
                 <Link href={`/messages/${listing.userId}`}>
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700"><MessageCircle className="w-4 h-4 mr-2" /> Message Seller</Button>
+                  <Button variant="outline" className="w-full"><MessageCircle className="w-4 h-4 mr-2" /> Message Seller</Button>
                 </Link>
               )}
             </CardContent>

@@ -4,10 +4,10 @@ import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import {
   Home, Search, PlusCircle, Bell, User as UserIcon,
-  Sun, Moon, Menu, X, MessageCircle, Play
+  Sun, Moon, Menu, X, MessageCircle, Play, ShoppingCart, Store
 } from "lucide-react";
 import { Button } from "./ui/button";
-import { useListNotifications } from "@/lib/api";
+import { useListNotifications, useGetCart } from "@/lib/api";
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
@@ -21,6 +21,9 @@ export default function Layout({ children }) {
     refetchIntervalInBackground: false,
   });
   const unreadCount = notifications?.filter((n) => !n.isRead).length ?? 0;
+
+  const { data: cartItems } = useGetCart({ enabled: !!user });
+  const cartCount = cartItems?.length ?? 0;
 
   const navLinks = [
     { label: "Home", href: "/" },
@@ -77,6 +80,21 @@ export default function Layout({ children }) {
                   <Link href="/messages">
                     <Button variant="ghost" size="icon">
                       <MessageCircle className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                  <Link href="/cart">
+                    <Button variant="ghost" size="icon" className="relative">
+                      <ShoppingCart className="w-4 h-4" />
+                      {cartCount > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-purple-500 text-[10px] text-white font-bold">
+                          {cartCount > 9 ? "9+" : cartCount}
+                        </span>
+                      )}
+                    </Button>
+                  </Link>
+                  <Link href="/my-shop">
+                    <Button variant="ghost" size="icon" title="My Shop">
+                      <Store className="w-4 h-4" />
                     </Button>
                   </Link>
                   {(user.role === "admin" || user.role === "super_admin") && (

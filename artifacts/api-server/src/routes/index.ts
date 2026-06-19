@@ -17,6 +17,8 @@ import reelsRouter from "./reels";
 import socialRouter from "./social";
 import notificationsRouter from "./notifications";
 import messagesRouter from "./messages";
+import cartRouter from "./cart";
+import userShopsRouter from "./user-shops";
 
 const router: IRouter = Router();
 
@@ -38,5 +40,7 @@ router.use("/reels", reelsRouter);
 router.use(socialRouter);
 router.use("/notifications", notificationsRouter);
 router.use("/messages", messagesRouter);
+router.use("/cart", cartRouter);
+router.use("/user-shops", userShopsRouter);
 
 export default router;

@@ -518,6 +518,81 @@ export function useSendMessage() {
   });
 }
 
+// ─── Cart ─────────────────────────────────────────────────────────────────────
+export function useGetCart(options = {}) {
+  return useQuery({
+    queryKey: ["cart"],
+    queryFn: () => api.get("/cart").then((r) => r.data),
+    ...options,
+  });
+}
+
+export function useAddToCart() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (listingId) => api.post("/cart", { listingId }).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
+  });
+}
+
+export function useRemoveFromCart() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (listingId) => api.delete(`/cart/${listingId}`).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
+  });
+}
+
+// ─── User Shops ───────────────────────────────────────────────────────────────
+export function useGetMyShop(options = {}) {
+  return useQuery({
+    queryKey: ["myShop"],
+    queryFn: () => api.get("/user-shops/my").then((r) => r.data),
+    ...options,
+  });
+}
+
+export function useGetUserShop(shopId, options = {}) {
+  return useQuery({
+    queryKey: ["userShop", shopId],
+    queryFn: () => api.get(`/user-shops/${shopId}`).then((r) => r.data),
+    enabled: !!shopId,
+    ...options,
+  });
+}
+
+export function useCreateMyShop() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.post("/user-shops", data).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["myShop"] }),
+  });
+}
+
+export function useUpdateMyShop() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.patch("/user-shops/my", data).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["myShop"] }),
+  });
+}
+
+export function useAddShopItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.post("/user-shops/my/items", data).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["myShop"] }),
+  });
+}
+
+export function useDeleteShopItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (itemId) => api.delete(`/user-shops/my/items/${itemId}`).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["myShop"] }),
+  });
+}
+
 // ─── Stats ───────────────────────────────────────────────────────────────────
 export function useGetDashboardStats(options = {}) {
   return useQuery({

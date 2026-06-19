@@ -40,6 +40,9 @@ import NotificationsPage from "@/pages/notifications/index";
 import MessagesPage from "@/pages/messages/index";
 import ConversationPage from "@/pages/messages/conversation";
 import PublicProfile from "@/pages/profile/id";
+import CartPage from "@/pages/cart/index";
+import MyShopPage from "@/pages/my-shop/index";
+import ShopView from "@/pages/my-shop/shop";
 
 import AdminDashboard from "@/pages/admin/index";
 import AdminUsers from "@/pages/admin/users";
@@ -127,6 +130,10 @@ function Router() {
             <Route path="/messages" component={MessagesPage} />
             <Route path="/messages/:userId" component={ConversationPage} />
             <Route path="/profile/:id" component={PublicProfile} />
+
+            <Route path="/cart" component={CartPage} />
+            <Route path="/my-shop" component={MyShopPage} />
+            <Route path="/shop/:id" component={ShopView} />
 
             <Route component={NotFound} />
           </Switch>
