@@ -82,6 +82,28 @@ function ProviderBookingCard({ booking, onStatusChange, loading }) {
               <div className="mt-3 flex gap-2">
                 <Button
                   size="sm"
+                  className="h-7 text-xs px-3 bg-blue-600 hover:bg-blue-700"
+                  onClick={() => onStatusChange(booking.id, "confirmed")}
+                  disabled={loading === booking.id}
+                >
+                  <CheckCircle2 className="w-3 h-3 mr-1" /> Confirm
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs px-3 text-red-600 border-red-200 hover:bg-red-50"
+                  onClick={() => onStatusChange(booking.id, "rejected")}
+                  disabled={loading === booking.id}
+                >
+                  <XCircle className="w-3 h-3 mr-1" /> Reject
+                </Button>
+              </div>
+            )}
+
+            {booking.status === "confirmed" && (
+              <div className="mt-3 flex gap-2">
+                <Button
+                  size="sm"
                   className="h-7 text-xs px-3"
                   onClick={() => onStatusChange(booking.id, "completed")}
                   disabled={loading === booking.id}

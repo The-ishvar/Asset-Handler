@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useMyBookings, useCancelBooking, useGetBooking } from "@/lib/api";
+import { useMyBookings, useCancelBooking } from "@/lib/api";
 import { Car, Bus, Ticket, Stethoscope, QrCode, X, Loader2, CalendarClock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import BookingConfirmation from "./BookingConfirmation";
