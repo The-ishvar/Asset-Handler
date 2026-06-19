@@ -7,7 +7,18 @@ import { requireAdmin } from "../middlewares/auth";
 const router = Router();
 
 function fmt(s: typeof jobsTable.$inferSelect) {
-  return { ...s, createdAt: s.createdAt.toISOString() };
+  return {
+    id: s.id,
+    title: s.title,
+    description: s.description,
+    location: s.location,
+    salary: s.salary,
+    contactPhone: s.contactNumber,
+    contactNumber: s.contactNumber,
+    company: null,
+    type: null,
+    createdAt: s.createdAt.toISOString(),
+  };
 }
 
 router.get("/", async (req, res) => {
@@ -16,18 +27,26 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", requireAdmin, async (req, res) => {
-  const { title, description, contactNumber, salary, location } = req.body;
-  if (!title || !contactNumber) {
-    res.status(400).json({ error: "title, contactNumber required" }); return;
-  }
-  const [row] = await db.insert(jobsTable).values({ title, description, contactNumber, salary, location }).returning();
+  const { title, company, type, location, salary, contactPhone, contactNumber, description } = req.body;
+  if (!title) { res.status(400).json({ error: "title required" }); return; }
+  const [row] = await db.insert(jobsTable).values({
+    title,
+    description: description || null,
+    contactNumber: contactPhone || contactNumber || "",
+    salary: salary || null,
+    location: location || null,
+  }).returning();
   res.status(201).json(fmt(row));
 });
 
 router.patch("/:id", requireAdmin, async (req, res) => {
+  const { title, description, location, salary, contactPhone, contactNumber } = req.body;
   const updates: Partial<typeof jobsTable.$inferInsert> = {};
-  const fields = ["title", "description", "contactNumber", "salary", "location"] as const;
-  for (const f of fields) if (req.body[f] !== undefined) (updates as any)[f] = req.body[f];
+  if (title !== undefined) updates.title = title;
+  if (description !== undefined) updates.description = description;
+  if (location !== undefined) updates.location = location;
+  if (salary !== undefined) updates.salary = salary;
+  if (contactPhone !== undefined || contactNumber !== undefined) updates.contactNumber = contactPhone ?? contactNumber;
   const [row] = await db.update(jobsTable).set(updates).where(eq(jobsTable.id, parseInt(req.params.id as string))).returning();
   if (!row) { res.status(404).json({ error: "Not found" }); return; }
   res.json(fmt(row));

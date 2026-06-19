@@ -7,7 +7,21 @@ import { requireAdmin } from "../middlewares/auth";
 const router = Router();
 
 function fmt(s: typeof schoolsTable.$inferSelect) {
-  return { ...s, createdAt: s.createdAt.toISOString() };
+  return {
+    id: s.id,
+    name: s.name,
+    address: s.address,
+    phone: s.contactNumber,
+    type: s.classInfo ?? null,
+    timing: null,
+    description: s.feeInfo ?? null,
+    photoUrl: s.photoUrl,
+    contactNumber: s.contactNumber,
+    classInfo: s.classInfo,
+    feeInfo: s.feeInfo,
+    mapLocation: s.mapLocation,
+    createdAt: s.createdAt.toISOString(),
+  };
 }
 
 router.get("/", async (req, res) => {
@@ -16,12 +30,17 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", requireAdmin, async (req, res) => {
-  const { name, photoUrl, address, contactNumber, classInfo, feeInfo, mapLocation } = req.body;
-  if (!name || !address || !contactNumber) {
-    res.status(400).json({ error: "name, address, contactNumber required" });
-    return;
-  }
-  const [row] = await db.insert(schoolsTable).values({ name, photoUrl, address, contactNumber, classInfo, feeInfo, mapLocation }).returning();
+  const { name, address, phone, contactNumber, type, classInfo, timing, description, feeInfo, photoUrl, mapLocation } = req.body;
+  if (!name) { res.status(400).json({ error: "name required" }); return; }
+  const [row] = await db.insert(schoolsTable).values({
+    name,
+    address: address || "",
+    contactNumber: phone || contactNumber || "",
+    classInfo: type || classInfo || null,
+    feeInfo: description || feeInfo || null,
+    photoUrl: photoUrl || null,
+    mapLocation: mapLocation || null,
+  }).returning();
   res.status(201).json(fmt(row));
 });
 
@@ -32,14 +51,14 @@ router.get("/:id", async (req, res) => {
 });
 
 router.patch("/:id", requireAdmin, async (req, res) => {
-  const { name, photoUrl, address, contactNumber, classInfo, feeInfo, mapLocation } = req.body;
+  const { name, address, phone, contactNumber, type, classInfo, description, feeInfo, photoUrl, mapLocation } = req.body;
   const updates: Partial<typeof schoolsTable.$inferInsert> = {};
   if (name !== undefined) updates.name = name;
-  if (photoUrl !== undefined) updates.photoUrl = photoUrl;
   if (address !== undefined) updates.address = address;
-  if (contactNumber !== undefined) updates.contactNumber = contactNumber;
-  if (classInfo !== undefined) updates.classInfo = classInfo;
-  if (feeInfo !== undefined) updates.feeInfo = feeInfo;
+  if (phone !== undefined || contactNumber !== undefined) updates.contactNumber = phone ?? contactNumber;
+  if (type !== undefined || classInfo !== undefined) updates.classInfo = type ?? classInfo;
+  if (description !== undefined || feeInfo !== undefined) updates.feeInfo = description ?? feeInfo;
+  if (photoUrl !== undefined) updates.photoUrl = photoUrl;
   if (mapLocation !== undefined) updates.mapLocation = mapLocation;
   const [row] = await db.update(schoolsTable).set(updates).where(eq(schoolsTable.id, parseInt(req.params.id as string))).returning();
   if (!row) { res.status(404).json({ error: "Not found" }); return; }

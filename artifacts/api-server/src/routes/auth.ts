@@ -3,55 +3,79 @@ import bcrypt from "bcryptjs";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { RegisterBody, LoginBody } from "@workspace/api-zod";
 import { requireAuth, signToken } from "../middlewares/auth";
 
 const router = Router();
+
+const SUPER_ADMIN_PHONE = process.env.SUPER_ADMIN_PHONE || "9660585691";
+const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "9660585691ms";
 
 function formatUser(user: typeof usersTable.$inferSelect) {
   return {
     id: user.id,
     name: user.name,
-    email: user.email,
+    email: user.email ?? null,
     phone: user.phone ?? null,
     avatarUrl: user.avatarUrl ?? null,
+    bio: (user as any).bio ?? null,
+    coverUrl: (user as any).coverUrl ?? null,
     role: user.role,
     createdAt: user.createdAt.toISOString(),
   };
 }
 
 router.post("/register", async (req, res) => {
-  const parsed = RegisterBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid input" });
+  const { name, phone, password, village, bio } = req.body;
+  if (!name || !phone || !password) {
+    res.status(400).json({ error: "name, phone, and password are required" });
     return;
   }
-  const { name, email, password, phone } = parsed.data;
-  const existing = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+  const existing = await db.select().from(usersTable).where(eq(usersTable.phone, phone)).limit(1);
   if (existing.length > 0) {
-    res.status(400).json({ error: "Email already registered" });
+    res.status(400).json({ error: "Phone number already registered" });
     return;
   }
   const passwordHash = await bcrypt.hash(password, 10);
   const [user] = await db.insert(usersTable).values({
     name,
-    email,
+    phone,
+    email: null,
     passwordHash,
-    phone: phone ?? null,
     role: "user",
-  }).returning();
+  } as any).returning();
   const token = signToken(user.id, user.role);
   res.status(201).json({ token, user: formatUser(user) });
 });
 
 router.post("/login", async (req, res) => {
-  const parsed = LoginBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid input" });
+  const { phone, password } = req.body;
+  if (!phone || !password) {
+    res.status(400).json({ error: "phone and password are required" });
     return;
   }
-  const { email, password } = parsed.data;
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+
+  // Super Admin shortcut
+  if (phone === SUPER_ADMIN_PHONE && password === SUPER_ADMIN_PASSWORD) {
+    // Find or create super admin user
+    let [superAdmin] = await db.select().from(usersTable).where(eq(usersTable.phone, SUPER_ADMIN_PHONE)).limit(1);
+    if (!superAdmin) {
+      const hash = await bcrypt.hash(SUPER_ADMIN_PASSWORD, 10);
+      [superAdmin] = await db.insert(usersTable).values({
+        name: "Super Admin",
+        phone: SUPER_ADMIN_PHONE,
+        email: null,
+        passwordHash: hash,
+        role: "super_admin",
+      } as any).returning();
+    } else if (superAdmin.role !== "super_admin") {
+      // Upgrade existing user to super admin
+      [superAdmin] = await db.update(usersTable).set({ role: "super_admin" } as any).where(eq(usersTable.id, superAdmin.id)).returning();
+    }
+    const token = signToken(superAdmin.id, superAdmin.role);
+    return res.json({ token, user: formatUser(superAdmin) });
+  }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.phone, phone)).limit(1);
   if (!user) {
     res.status(401).json({ error: "Invalid credentials" });
     return;
@@ -67,10 +91,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/me", requireAuth, async (req, res) => {
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
-  if (!user) {
-    res.status(404).json({ error: "User not found" });
-    return;
-  }
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
   res.json(formatUser(user));
 });
 

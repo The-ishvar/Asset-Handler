@@ -1,2 +1,3 @@
 - [Bhaleri social routes](bhaleri-social-routes.md) — optionalAuth + social router mounting pattern for this project
 - [Bhaleri OpenAPI naming](bhaleri-openapi-naming.md) — naming conventions that prevent Orval codegen conflicts
+- [Bhaleri JS migration](bhaleri-js-migration.md) — full .tsx→.jsx migration decisions, phone auth, super_admin, Socket.IO, DB field aliases

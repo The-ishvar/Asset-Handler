@@ -33,3 +33,9 @@ externalPort = 3000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+SUPER_ADMIN_PHONE = "9660585691"
+SUPER_ADMIN_PASSWORD = "9660585691ms"

@@ -7,7 +7,20 @@ import { requireAdmin } from "../middlewares/auth";
 const router = Router();
 
 function fmt(s: typeof shopsTable.$inferSelect) {
-  return { ...s, createdAt: s.createdAt.toISOString() };
+  return {
+    id: s.id,
+    name: s.name,
+    address: s.location,
+    phone: s.contactNumber,
+    type: s.availableItems ?? null,
+    timing: null,
+    description: null,
+    photoUrl: s.photoUrl,
+    contactNumber: s.contactNumber,
+    location: s.location,
+    mapLocation: s.mapLocation,
+    createdAt: s.createdAt.toISOString(),
+  };
 }
 
 router.get("/", async (req, res) => {
@@ -16,12 +29,17 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", requireAdmin, async (req, res) => {
-  const { name, photoUrl, availableItems, price, contactNumber, location, mapLocation } = req.body;
-  if (!name || !contactNumber || !location) {
-    res.status(400).json({ error: "name, contactNumber, location required" });
-    return;
-  }
-  const [row] = await db.insert(shopsTable).values({ name, photoUrl, availableItems, price, contactNumber, location, mapLocation }).returning();
+  const { name, address, location, phone, contactNumber, type, availableItems, description, photoUrl, price, mapLocation } = req.body;
+  if (!name) { res.status(400).json({ error: "name required" }); return; }
+  const [row] = await db.insert(shopsTable).values({
+    name,
+    location: address || location || "",
+    contactNumber: phone || contactNumber || "",
+    availableItems: type || availableItems || null,
+    photoUrl: photoUrl || null,
+    price: price || null,
+    mapLocation: mapLocation || null,
+  }).returning();
   res.status(201).json(fmt(row));
 });
 
@@ -32,9 +50,15 @@ router.get("/:id", async (req, res) => {
 });
 
 router.patch("/:id", requireAdmin, async (req, res) => {
+  const { name, address, location, phone, contactNumber, type, availableItems, photoUrl, price, mapLocation } = req.body;
   const updates: Partial<typeof shopsTable.$inferInsert> = {};
-  const fields = ["name", "photoUrl", "availableItems", "price", "contactNumber", "location", "mapLocation"] as const;
-  for (const f of fields) if (req.body[f] !== undefined) (updates as any)[f] = req.body[f];
+  if (name !== undefined) updates.name = name;
+  if (address !== undefined || location !== undefined) updates.location = address ?? location;
+  if (phone !== undefined || contactNumber !== undefined) updates.contactNumber = phone ?? contactNumber;
+  if (type !== undefined || availableItems !== undefined) updates.availableItems = type ?? availableItems;
+  if (photoUrl !== undefined) updates.photoUrl = photoUrl;
+  if (price !== undefined) updates.price = price;
+  if (mapLocation !== undefined) updates.mapLocation = mapLocation;
   const [row] = await db.update(shopsTable).set(updates).where(eq(shopsTable.id, parseInt(req.params.id as string))).returning();
   if (!row) { res.status(404).json({ error: "Not found" }); return; }
   res.json(fmt(row));

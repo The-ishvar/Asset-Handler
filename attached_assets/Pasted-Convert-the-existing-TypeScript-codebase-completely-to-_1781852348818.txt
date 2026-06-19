@@ -1,0 +1,131 @@
+Convert the existing TypeScript codebase completely to React + JavaScript (.jsx files). Do not change the current UI design, layout, colors, theme, responsiveness, navigation, animations, or user experience.
+
+Keep the existing WhatsApp-style design exactly as it is.
+
+Project name: Bhaleri Online
+
+Requirements:
+
+1. Authentication System
+- Implement Login, Register, Logout, Forgot Password, and Protected Routes.
+- Use React Context API for authentication state.
+- Use JWT authentication.
+- Store tokens securely.
+- Create three roles:
+  - Super Admin
+  - User
+  - Guest
+
+2. Super Admin Account
+- Create a predefined Super Admin account using environment variables:
+
+SUPER_ADMIN_PHONE=9660585691
+SUPER_ADMIN_PASSWORD=9660585691ms
+
+- Never hardcode credentials in frontend code.
+- Super Admin can:
+  - View all users
+  - Block/unblock users
+  - Delete users
+  - View login history
+  - View active users
+  - Manage all posts
+  - Manage all shops
+  - Manage all products
+  - Manage buses
+  - Manage jobs
+  - Manage schools
+  - Manage medical listings
+  - Send notifications
+  - View analytics dashboard
+
+3. User Features
+- User registration with:
+  - Name
+  - Phone number
+  - Profile photo
+  - Village
+  - Bio
+
+- Users can:
+  - Edit profile
+  - Follow/unfollow other users
+  - Create posts with images and videos
+  - Like, comment, and share posts
+  - View followers and following
+  - Search users
+  - Receive notifications
+
+4. Instagram-style Social Features
+- Feed page
+- Stories/Reels section
+- User profiles
+- Followers/following system
+- Post likes and comments
+- Save posts
+- Explore page
+- Infinite scrolling
+
+5. Shop System
+- Shop owners can:
+  - Create a shop
+  - Add products
+  - Upload product images
+  - Set price and stock
+  - Edit and delete products
+  - View orders
+
+6. Additional Modules
+- Marketplace
+- Jobs
+- Schools
+- Medical services
+- Buses and routes
+- Events
+- Emergency contacts
+- Village map
+
+7. Real-time Features
+- Implement Socket.IO for:
+  - Live chat
+  - Real-time notifications
+  - Online/offline status
+  - Typing indicators
+
+8. Backend Stack
+- Node.js
+- Express.js
+- MongoDB with Mongoose
+- Socket.IO
+- JWT
+- bcryptjs
+- Cloudinary for images
+
+9. Frontend Stack
+- React + Vite
+- Tailwind CSS
+- React Router DOM
+- Axios
+- Framer Motion
+- Lucide React
+
+10. Code Rules
+- Use only JavaScript and JSX.
+- Remove all TypeScript files and types.
+- Replace interfaces and types with JavaScript objects.
+- Keep folder structure clean.
+- Fix all import errors.
+- Fix all routing errors.
+- Fix all runtime errors.
+- Ensure the entire application works without warnings.
+
+11. Final Testing
+- Test all pages.
+- Test mobile responsiveness.
+- Test dark mode.
+- Test authentication.
+- Test Socket.IO features.
+- Test admin permissions.
+- Ensure production build works successfully.
+
+Do not redesign the UI. Preserve the existing design exactly.

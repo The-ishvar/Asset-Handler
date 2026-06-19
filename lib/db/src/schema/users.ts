@@ -2,14 +2,14 @@ import { pgTable, serial, text, timestamp, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const roleEnum = pgEnum("role", ["user", "admin"]);
+export const roleEnum = pgEnum("role", ["user", "admin", "super_admin"]);
 
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  email: text("email").notNull().unique(),
+  email: text("email"),
   passwordHash: text("password_hash").notNull(),
-  phone: text("phone"),
+  phone: text("phone").unique(),
   bio: text("bio"),
   avatarUrl: text("avatar_url"),
   coverUrl: text("cover_url"),

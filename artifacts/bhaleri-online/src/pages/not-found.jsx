@@ -1,0 +1,17 @@
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+
+export default function NotFound() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh] text-center">
+      <div className="space-y-4">
+        <div className="text-6xl">🏡</div>
+        <h1 className="text-4xl font-bold">404</h1>
+        <p className="text-muted-foreground text-lg">Page not found</p>
+        <Link href="/">
+          <Button>Go Home</Button>
+        </Link>
+      </div>
+    </div>
+  );
+}

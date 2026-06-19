@@ -7,7 +7,23 @@ import { requireAdmin } from "../middlewares/auth";
 const router = Router();
 
 function fmt(s: typeof emergencyContactsTable.$inferSelect) {
-  return { ...s, createdAt: s.createdAt.toISOString() };
+  return {
+    id: s.id,
+    name: s.name,
+    phone: s.contactNumber,
+    contactNumber: s.contactNumber,
+    description: s.description,
+    category: s.category,
+    createdAt: s.createdAt.toISOString(),
+  };
+}
+
+const VALID_CATEGORIES = ["hospital", "ambulance", "police", "electricity", "fire", "other"] as const;
+type Category = typeof VALID_CATEGORIES[number];
+
+function resolveCategory(cat?: string): Category {
+  if (cat && VALID_CATEGORIES.includes(cat as Category)) return cat as Category;
+  return "other";
 }
 
 router.get("/", async (req, res) => {
@@ -16,20 +32,23 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", requireAdmin, async (req, res) => {
-  const { name, contactNumber, category, description } = req.body;
-  if (!name || !contactNumber || !category) {
-    res.status(400).json({ error: "name, contactNumber, category required" }); return;
-  }
-  const [row] = await db.insert(emergencyContactsTable).values({ name, contactNumber, category, description }).returning();
+  const { name, phone, contactNumber, category, description } = req.body;
+  if (!name) { res.status(400).json({ error: "name required" }); return; }
+  const [row] = await db.insert(emergencyContactsTable).values({
+    name,
+    contactNumber: phone || contactNumber || "",
+    category: resolveCategory(category),
+    description: description || null,
+  }).returning();
   res.status(201).json(fmt(row));
 });
 
 router.patch("/:id", requireAdmin, async (req, res) => {
+  const { name, phone, contactNumber, category, description } = req.body;
   const updates: Partial<typeof emergencyContactsTable.$inferInsert> = {};
-  const { name, contactNumber, category, description } = req.body;
   if (name !== undefined) updates.name = name;
-  if (contactNumber !== undefined) updates.contactNumber = contactNumber;
-  if (category !== undefined) updates.category = category;
+  if (phone !== undefined || contactNumber !== undefined) updates.contactNumber = phone ?? contactNumber;
+  if (category !== undefined) updates.category = resolveCategory(category);
   if (description !== undefined) updates.description = description;
   const [row] = await db.update(emergencyContactsTable).set(updates).where(eq(emergencyContactsTable.id, parseInt(req.params.id as string))).returning();
   if (!row) { res.status(404).json({ error: "Not found" }); return; }
