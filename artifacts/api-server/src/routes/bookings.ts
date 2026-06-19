@@ -4,12 +4,21 @@ import {
   bookingsTable, bookingStatusHistoryTable, providersTable,
   usersTable, notificationsTable
 } from "@workspace/db";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { emitToUser } from "../lib/socket";
 import QRCode from "qrcode";
 
 const router = Router();
+
+// ── Valid state machine transitions ──────────────────────────────────────────
+// Terminal states cannot transition further
+const TERMINAL_STATES = new Set(["completed", "cancelled", "rejected"]);
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  pending:   ["accepted", "rejected"],
+  accepted:  ["confirmed", "rejected"],
+  confirmed: ["completed"],
+};
 
 async function generateQR(bookingId: number, type: string): Promise<string> {
   const payload = JSON.stringify({ bookingId, type, app: "Bhaleri Online" });
@@ -52,7 +61,7 @@ async function notifyUser(userId: number, content: string, link: string, fromUse
   emitToUser(userId, "notification", notif);
 }
 
-// ── User routes ──────────────────────────────────────────────────────────────
+// ── IMPORTANT: All static routes MUST be declared before /:id ────────────────
 
 // GET /bookings/mine
 router.get("/mine", requireAuth, async (req, res) => {
@@ -82,7 +91,39 @@ router.get("/mine", requireAuth, async (req, res) => {
   }
 });
 
-// GET /bookings/provider (provider dashboard)
+// GET /bookings/providers/list — must be before /:id
+router.get("/providers/list", async (req, res) => {
+  try {
+    const { type } = req.query;
+    const rows = type
+      ? await db.select().from(providersTable).where(and(eq(providersTable.type, type as any), eq(providersTable.isActive, 1)))
+      : await db.select().from(providersTable).where(eq(providersTable.isActive, 1));
+    res.json(rows.map(p => ({ ...p, createdAt: p.createdAt.toISOString() })));
+  } catch (err) {
+    res.status(500).json({ error: "Failed" });
+  }
+});
+
+// GET /bookings/provider/earnings — must be before /:id
+router.get("/provider/earnings", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user!.userId;
+    const [provider] = await db.select().from(providersTable)
+      .where(eq(providersTable.userId, userId)).limit(1);
+
+    if (!provider) { res.status(403).json({ error: "Not a provider" }); return; }
+
+    const completed = await db.select().from(bookingsTable)
+      .where(and(eq(bookingsTable.providerId, provider.id), eq(bookingsTable.status, "completed")));
+
+    const total = completed.reduce((sum, b) => sum + parseFloat(String(b.amount)), 0);
+    res.json({ totalEarnings: total, completedBookings: completed.length });
+  } catch (err) {
+    res.status(500).json({ error: "Failed" });
+  }
+});
+
+// GET /bookings/provider (provider dashboard) — must be before /:id
 router.get("/provider", requireAuth, async (req, res) => {
   try {
     const userId = req.user!.userId;
@@ -106,29 +147,12 @@ router.get("/provider", requireAuth, async (req, res) => {
   }
 });
 
-// GET /bookings/provider/earnings
-router.get("/provider/earnings", requireAuth, async (req, res) => {
-  try {
-    const userId = req.user!.userId;
-    const [provider] = await db.select().from(providersTable)
-      .where(eq(providersTable.userId, userId)).limit(1);
-
-    if (!provider) { res.status(403).json({ error: "Not a provider" }); return; }
-
-    const completed = await db.select().from(bookingsTable)
-      .where(and(eq(bookingsTable.providerId, provider.id), eq(bookingsTable.status, "completed")));
-
-    const total = completed.reduce((sum, b) => sum + parseFloat(String(b.amount)), 0);
-    res.json({ totalEarnings: total, completedBookings: completed.length });
-  } catch (err) {
-    res.status(500).json({ error: "Failed" });
-  }
-});
-
-// GET /bookings/:id
+// GET /bookings/:id — dynamic route AFTER all static routes
 router.get("/:id", requireAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid booking ID" }); return; }
+
     const [booking] = await db.select().from(bookingsTable).where(eq(bookingsTable.id, id)).limit(1);
     if (!booking) { res.status(404).json({ error: "Not found" }); return; }
 
@@ -189,13 +213,23 @@ router.post("/", requireAuth, async (req, res) => {
     // Record history
     await recordHistory(booking.id, null, "pending", req.user!.userId, "Booking created");
 
-    // Notify provider
+    const formatted = fmtBooking(updated);
+
+    // Emit booking:created to booking owner for real-time update
+    emitToUser(req.user!.userId, "booking:created", formatted);
+
+    // Notify provider with booking:created event + persisted notification
     if (providerId) {
       const [provider] = await db.select().from(providersTable)
         .where(eq(providersTable.id, parseInt(providerId))).limit(1);
       if (provider) {
         const [bookingUser] = await db.select().from(usersTable)
           .where(eq(usersTable.id, req.user!.userId)).limit(1);
+
+        // Real-time Socket.IO event to provider
+        emitToUser(provider.userId, "booking:created", { ...formatted, userName: bookingUser?.name });
+
+        // Persisted notification
         await notifyUser(
           provider.userId,
           `New ${bookingType} booking #${booking.id} from ${bookingUser?.name || "someone"}`,
@@ -205,21 +239,32 @@ router.post("/", requireAuth, async (req, res) => {
       }
     }
 
-    res.status(201).json(fmtBooking(updated));
+    res.status(201).json(formatted);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to create booking" });
   }
 });
 
-// DELETE /bookings/:id (cancel)
+// DELETE /bookings/:id (user cancels their own pending booking)
 router.delete("/:id", requireAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid booking ID" }); return; }
+
     const [booking] = await db.select().from(bookingsTable).where(eq(bookingsTable.id, id)).limit(1);
     if (!booking) { res.status(404).json({ error: "Not found" }); return; }
     if (booking.userId !== req.user!.userId) { res.status(403).json({ error: "Forbidden" }); return; }
-    if (booking.status !== "pending") { res.status(400).json({ error: "Only pending bookings can be cancelled" }); return; }
+
+    // Enforce: only pending bookings can be cancelled
+    if (TERMINAL_STATES.has(booking.status)) {
+      res.status(400).json({ error: `Cannot cancel a booking that is already ${booking.status}` });
+      return;
+    }
+    if (!["pending"].includes(booking.status)) {
+      res.status(400).json({ error: "Only pending bookings can be cancelled by users" });
+      return;
+    }
 
     const [updated] = await db.update(bookingsTable)
       .set({ status: "cancelled", updatedAt: new Date() })
@@ -228,34 +273,54 @@ router.delete("/:id", requireAuth, async (req, res) => {
 
     await recordHistory(id, booking.status, "cancelled", req.user!.userId, "Cancelled by user");
 
+    const formatted = fmtBooking(updated);
+
+    // Real-time event to the cancelling user
+    emitToUser(req.user!.userId, "booking:updated", formatted);
+
+    // Notify provider
     if (booking.providerId) {
       const [provider] = await db.select().from(providersTable)
         .where(eq(providersTable.id, booking.providerId)).limit(1);
       if (provider) {
+        emitToUser(provider.userId, "booking:updated", formatted);
         await notifyUser(provider.userId, `Booking #${id} was cancelled by user`, "/provider");
       }
     }
 
-    res.json(fmtBooking(updated));
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ error: "Failed" });
   }
 });
 
-// PATCH /bookings/:id/status (provider/admin only)
+// PATCH /bookings/:id/status (provider/admin changes status)
 router.patch("/:id/status", requireAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id as string);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid booking ID" }); return; }
+
     const { status, note } = req.body;
-    const allowed = ["accepted", "confirmed", "completed", "rejected"];
-    if (!allowed.includes(status)) {
-      res.status(400).json({ error: "Invalid status. Allowed: " + allowed.join(", ") });
-      return;
-    }
 
     const [booking] = await db.select().from(bookingsTable).where(eq(bookingsTable.id, id)).limit(1);
     if (!booking) { res.status(404).json({ error: "Not found" }); return; }
 
+    // Enforce terminal state protection
+    if (TERMINAL_STATES.has(booking.status)) {
+      res.status(400).json({ error: `Booking is already in terminal state: ${booking.status}` });
+      return;
+    }
+
+    // Enforce valid transitions
+    const allowedNext = VALID_TRANSITIONS[booking.status] ?? [];
+    if (!allowedNext.includes(status)) {
+      res.status(400).json({
+        error: `Invalid transition: ${booking.status} → ${status}. Allowed: ${allowedNext.join(", ")}`,
+      });
+      return;
+    }
+
+    // Authorization: must be the provider or admin
     const userId = req.user!.userId;
     const isAdmin = req.user!.role === "admin" || req.user!.role === "super_admin";
     let isProvider = false;
@@ -273,7 +338,12 @@ router.patch("/:id/status", requireAuth, async (req, res) => {
 
     await recordHistory(id, booking.status, status, userId, note || null);
 
-    // Notify the booking owner
+    const formatted = fmtBooking(updated);
+
+    // Real-time booking:updated event to the booking owner
+    emitToUser(booking.userId, "booking:updated", formatted);
+
+    // Persisted notification to booking owner
     await notifyUser(
       booking.userId,
       `Your booking #${id} status changed to ${status}`,
@@ -281,20 +351,7 @@ router.patch("/:id/status", requireAuth, async (req, res) => {
       userId
     );
 
-    res.json(fmtBooking(updated));
-  } catch (err) {
-    res.status(500).json({ error: "Failed" });
-  }
-});
-
-// GET /bookings/providers/list (public)
-router.get("/providers/list", async (req, res) => {
-  try {
-    const { type } = req.query;
-    const rows = type
-      ? await db.select().from(providersTable).where(and(eq(providersTable.type, type as any), eq(providersTable.isActive, 1)))
-      : await db.select().from(providersTable).where(eq(providersTable.isActive, 1));
-    res.json(rows.map(p => ({ ...p, createdAt: p.createdAt.toISOString() })));
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ error: "Failed" });
   }

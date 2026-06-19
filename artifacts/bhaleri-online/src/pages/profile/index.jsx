@@ -11,8 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Settings, LogOut, Shield, Plus, Play, Edit3, Phone, Mail, CalendarClock } from "lucide-react";
+import { Package, Settings, LogOut, Shield, Plus, Play, Edit3, Phone, Mail, CalendarClock, ClipboardList } from "lucide-react";
 import MyBookings from "@/components/booking/MyBookings";
+import { useProviderDashboard } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
@@ -38,6 +39,7 @@ export default function Profile() {
     { enabled: !!user?.id }
   );
   const { data: profile } = useGetUserProfile(user?.id, { enabled: !!user?.id });
+  const { data: providerData } = useProviderDashboard({ enabled: !!user, retry: false });
 
   const updateUser = useUpdateUser();
   const patchProfile = usePatchMyProfile();
@@ -98,6 +100,11 @@ export default function Profile() {
             {(user.role === "admin" || user.role === "super_admin") && (
               <Button size="sm" variant="outline" asChild>
                 <Link href="/admin">Admin</Link>
+              </Button>
+            )}
+            {providerData?.provider && (
+              <Button size="sm" variant="outline" asChild>
+                <Link href="/provider"><ClipboardList className="w-3.5 h-3.5 mr-1" /> Provider</Link>
               </Button>
             )}
             <Button size="sm" variant="outline" onClick={() => setIsEditing(!isEditing)}>
