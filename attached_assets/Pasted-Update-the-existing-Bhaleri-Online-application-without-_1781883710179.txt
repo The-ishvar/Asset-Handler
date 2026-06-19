@@ -1,0 +1,106 @@
+Update the existing "Bhaleri Online" application without changing the current theme, colors, animations, responsiveness, or overall UI design.
+
+Requirements:
+
+1. Reels Module:
+
+* Remove the video URL input field completely.
+* Users must upload videos directly from their device gallery or file manager.
+* Support video preview before upload.
+* Add only these fields:
+
+  * Video upload
+  * Title
+  * Tags
+  * Description
+* Store videos in cloud storage.
+* Show reels in an Instagram-style vertical feed.
+
+2. Posts Module:
+
+* Posts are for community updates only, not for selling products.
+* Remove product-related fields from posts.
+* Users can create posts with:
+
+  * Text
+  * Images from gallery
+  * Videos from gallery
+  * Caption
+  * Tags
+* Add like, comment, share, and follow features.
+
+3. Marketplace Module:
+
+* Separate marketplace from posts.
+* Users can:
+
+  * Upload products with images from gallery
+  * Add title
+  * Description
+  * Price
+  * Category
+  * Location
+  * Contact number
+* Users can buy and sell items locally.
+
+4. Jobs Module:
+
+* Users can create job listings.
+* Add Apply button.
+* Users can submit applications directly in the app.
+* Store applicant details in the database.
+
+5. Shop Module:
+
+* Shop owners can create their own shop profile.
+* Shop owners can add, edit, and delete products.
+* Each shop should have:
+
+  * Shop name
+  * Owner name
+  * Address
+  * Contact number
+  * Product list
+
+6. Navigation:
+
+* Fix duplicate navigation bars.
+* Show only one navbar across the entire app.
+* Remove the footer completely.
+
+7. User Features:
+
+* Follow and unfollow users.
+* User profiles with posts, reels, followers, and following count.
+* Notifications for likes, comments, follows, and messages.
+
+8. Admin Features:
+
+* Super Admin can manage:
+
+  * Users
+  * Shops
+  * Products
+  * Jobs
+  * Posts
+  * Reels
+* Admin can delete inappropriate content.
+
+9. Technical Requirements:
+
+* Use React with JavaScript (.jsx only).
+* Remove TypeScript files completely.
+* Use Tailwind CSS.
+* Use React Router.
+* Use Context API for authentication.
+* Use MongoDB for database.
+* Use Cloudinary for image and video uploads.
+* Use Socket.IO for real-time chat and notifications.
+
+10. Important:
+
+* Keep the existing theme exactly the same.
+* Do not change current colors, layout, spacing, or responsiveness.
+* Ensure all forms are mobile-friendly.
+* Test every page, route, API, upload feature, and database operation.
+* Fix all bugs and console errors automatically.
