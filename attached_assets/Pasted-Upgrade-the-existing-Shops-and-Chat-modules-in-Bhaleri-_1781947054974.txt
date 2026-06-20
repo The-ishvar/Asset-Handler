@@ -1,0 +1,155 @@
+Upgrade the existing Shops and Chat modules in Bhaleri Online without changing the current theme, colors, navigation, responsiveness, animations, or overall UI design.
+
+Current issues:
+
+* Newly created shops are not appearing in the shop listing page.
+* The message "No shops listed yet" is shown even after creating a shop.
+* Clicking on a shop does not open the shop details page.
+* Shop products are not displayed.
+* Chat experience is not user-friendly.
+* Empty pages make the app feel incomplete.
+
+Fix all issues and implement the following features:
+
+SHOP LISTING
+
+* Ensure every newly created shop is saved correctly in the database.
+* Refresh the shop list automatically after shop creation.
+* Remove the "No shops listed yet" message when shops exist.
+* Show shops instantly without requiring page refresh.
+
+Each shop card must display:
+
+* Shop logo/image
+* Shop name
+* Owner name
+* Category
+* Village/location
+* Rating
+* Number of products
+* Open/Closed status
+
+SHOP DETAILS PAGE
+
+When a user clicks on a shop card:
+
+* Open a dedicated shop page.
+* Show complete shop information.
+* Display all products uploaded by that shop.
+* Add product search inside the shop.
+* Add category filters.
+* Show seller contact information.
+* Show delivery availability.
+* Show reviews and ratings.
+
+Product cards must include:
+
+* Product image
+* Product title
+* Price
+* Original price
+* Discount percentage
+* Stock status
+* Add to Cart button
+* Buy Now button
+
+CHAT SYSTEM
+
+Redesign the chat module similar to WhatsApp while keeping the existing Bhaleri Online theme.
+
+Features:
+
+* Real-time messaging
+* Online/Offline status
+* Last seen
+* Typing indicator
+* Read receipts
+* Unread message count
+* Image sharing from gallery
+* Product sharing inside chat
+* Search conversations
+* Emoji picker
+* Message timestamps
+
+Chat layout:
+
+* Conversation list on the left
+* Active chat window on the right
+* Sticky message input at the bottom
+
+Mobile layout:
+
+* Full-screen chat experience
+* Smooth transitions between chat list and messages
+
+Shop Integration:
+
+* Add a "Chat with Shop Owner" button on every shop page.
+* Users can directly message shop owners.
+* Shop owners receive notifications for new messages.
+
+NOTIFICATIONS
+
+* Send real-time notifications for new messages.
+* Update unread counts instantly.
+
+DEMO DATA
+
+If the database is empty, automatically show realistic sample data.
+
+Create at least:
+
+Shops:
+
+* Bhaleri Medical Store
+* Shree Ram Kirana Store
+* Bhaleri Mobile Point
+* Kisan Agro Center
+* Bhaleri Fashion Hub
+* Maa Bhawani Sweets
+* Fresh Vegetable Market
+* Bhaleri Hardware Store
+
+Products:
+
+* Groceries
+* Vegetables
+* Medicines
+* Mobile accessories
+* Clothing
+* Farming tools
+* Household items
+* Snacks and sweets
+
+Services:
+
+* Auto booking providers
+* Bus operators
+* Doctors and clinics
+* Schools
+* Emergency contacts
+
+Create sample images, ratings, reviews, prices, stock quantities, locations, and seller profiles.
+
+Show skeleton loaders while data loads.
+
+Empty State Rules:
+
+* Never show completely empty pages.
+* Display demo content until real content is available.
+* Clearly label demo content as "Sample Data".
+
+PERFORMANCE
+
+* Use pagination or lazy loading for messages.
+* Optimize image uploads.
+* Keep chat fast and responsive.
+
+IMPORTANT
+
+* Preserve all existing UI and theme settings.
+* Keep everything mobile-first and fully responsive.
+* Ensure all changes work without page refresh.
+* Make the Shops and Chat modules production-ready.
+* Do not change the current design system.
+* Do not remove any existing functionality.

@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useFeatures } from "@/lib/features";
 import {
   ShoppingBag, PlusCircle, Search, SlidersHorizontal, X,
-  Heart, MapPin, Star, ShoppingCart, Filter
+  Heart, MapPin, Star, ShoppingCart, Filter, Store, ArrowRight
 } from "lucide-react";
 import AdsSection from "@/components/ads-section";
 
@@ -285,6 +285,22 @@ export default function BuySellList() {
           </div>
         </div>
       )}
+
+      {/* Browse Shops Banner */}
+      <Link href="/user-shops">
+        <div className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl px-4 py-3 hover:shadow-md transition-all cursor-pointer">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-600 rounded-lg">
+              <Store className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-purple-900 dark:text-purple-100">Browse Local Shops</p>
+              <p className="text-xs text-purple-600 dark:text-purple-400">Explore shops from Bhaleri sellers</p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-purple-600 shrink-0" />
+        </div>
+      </Link>
 
       <AdsSection max={2} title="Sponsored" />
 

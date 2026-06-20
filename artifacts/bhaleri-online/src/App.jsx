@@ -46,6 +46,7 @@ import CartPage from "@/pages/cart/index";
 import CheckoutPage from "@/pages/checkout";
 import MyShopPage from "@/pages/my-shop/index";
 import ShopView from "@/pages/my-shop/shop";
+import UserShopsPage from "@/pages/user-shops/index";
 import PostsPage from "@/pages/posts/index";
 import SnapsPage from "@/pages/snaps/index";
 import BookAuto from "@/pages/book/auto";
@@ -138,6 +139,7 @@ function Router() {
             <FeatureRoute path="/shops/:id" component={ShopDetail} featureKey="shops" />
             <FeatureRoute path="/my-shop" component={MyShopPage} featureKey="shops" />
             <FeatureRoute path="/shop/:id" component={ShopView} featureKey="shops" />
+            <FeatureRoute path="/user-shops" component={UserShopsPage} featureKey="shops" />
 
             <FeatureRoute path="/buses" component={BusList} featureKey="busBooking" />
 

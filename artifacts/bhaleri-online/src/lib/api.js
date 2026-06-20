@@ -618,6 +618,14 @@ export function useUpdateCartQuantity() {
 }
 
 // ─── User Shops ───────────────────────────────────────────────────────────────
+export function useListUserShops(options = {}) {
+  return useQuery({
+    queryKey: ["listUserShops"],
+    queryFn: () => api.get("/user-shops").then((r) => r.data),
+    ...options,
+  });
+}
+
 export function useGetMyShop(options = {}) {
   return useQuery({
     queryKey: ["myShop"],

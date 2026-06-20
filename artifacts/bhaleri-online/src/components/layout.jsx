@@ -31,6 +31,7 @@ export default function Layout({ children }) {
     { label: "Home", href: "/" },
     { label: "Posts", href: "/posts", featureKey: "posts" },
     { label: "Buy & Sell", href: "/buy-sell", featureKey: "marketplace" },
+    { label: "Shops", href: "/user-shops", featureKey: "shops" },
     { label: "Reels", href: "/reels", featureKey: "reels" },
     { label: "Jobs", href: "/jobs", featureKey: "jobs" },
     { label: "Events", href: "/events", featureKey: "events" },

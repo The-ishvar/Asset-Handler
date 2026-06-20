@@ -11,6 +11,34 @@ function fmt(m: typeof messagesTable.$inferSelect) {
   return { ...m, createdAt: m.createdAt.toISOString() };
 }
 
+// GET /messages/conversations — alias for conversation list
+router.get("/conversations", requireAuth, async (req, res) => {
+  const userId = req.user!.userId;
+  const allMessages = await db.select().from(messagesTable)
+    .where(or(eq(messagesTable.senderId, userId), eq(messagesTable.receiverId, userId)))
+    .orderBy(desc(messagesTable.createdAt));
+  const convMap = new Map<number, typeof allMessages[number]>();
+  for (const msg of allMessages) {
+    const otherId = msg.senderId === userId ? msg.receiverId : msg.senderId;
+    if (!convMap.has(otherId)) convMap.set(otherId, msg);
+  }
+  const conversations = await Promise.all(
+    Array.from(convMap.entries()).map(async ([otherId, lastMsg]) => {
+      const [other] = await db.select().from(usersTable).where(eq(usersTable.id, otherId)).limit(1);
+      const unread = allMessages.filter(m => m.senderId === otherId && m.receiverId === userId && !m.isRead).length;
+      return {
+        userId: otherId,
+        userName: other?.name || "Unknown",
+        userAvatarUrl: other?.avatarUrl || null,
+        lastMessage: lastMsg.content,
+        lastMessageAt: lastMsg.createdAt.toISOString(),
+        unreadCount: unread,
+      };
+    })
+  );
+  res.json(conversations);
+});
+
 // GET /messages — get list of conversations
 router.get("/", requireAuth, async (req, res) => {
   const userId = req.user!.userId;
