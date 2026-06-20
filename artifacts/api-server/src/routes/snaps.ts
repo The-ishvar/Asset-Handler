@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { snapsTable, usersTable } from "@workspace/db/schema";
 import { eq, and, or, desc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { emitToUser } from "../lib/socket";
 
 const router = Router();
 
@@ -18,6 +19,8 @@ router.post("/snaps", requireAuth, async (req: any, res) => {
       mediaUrl: mediaUrl || null,
       caption: caption || null,
     }).returning();
+    // Notify receiver in real-time
+    emitToUser(Number(receiverId), "new_snap", { senderId: req.user.userId });
     res.json(snap);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -41,6 +44,12 @@ router.post("/snaps/bulk", requireAuth, async (req: any, res) => {
     }));
 
     const snaps = await db.insert(snapsTable).values(rows).returning();
+
+    // Notify each receiver in real-time
+    for (const rid of receiverIds) {
+      emitToUser(Number(rid), "new_snap", { senderId: req.user.userId });
+    }
+
     res.json({ sent: snaps.length });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

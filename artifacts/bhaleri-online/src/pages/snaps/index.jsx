@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { Link, useLocation, useSearch } from "wouter";
 import {
   useGetSnapInbox, useGetSnapSent, useSendSnap, useSendSnapBulk,
   useViewSnap, useSearchUsers, useGetMyFollowing
 } from "@/lib/api";
+import { connectSocket, getSocket } from "@/lib/socket";
 import { useUpload } from "@/hooks/use-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -493,6 +495,7 @@ function SendSnapModal({ onClose, preselectedId, preselectedName }) {
 // ─── Main snaps page ───────────────────────────────────────────────────────────
 export default function SnapsPage() {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const searchStr = useSearch();
   const params = new URLSearchParams(searchStr);
   const preselectedId = params.get("to");
@@ -504,6 +507,21 @@ export default function SnapsPage() {
 
   const { data: inbox } = useGetSnapInbox({ enabled: !!user });
   const { data: sent } = useGetSnapSent({ enabled: !!user });
+
+  // Real-time: listen for new_snap events via Socket.IO
+  useEffect(() => {
+    if (!user) return;
+    const socket = connectSocket(user.id);
+
+    const handleNewSnap = () => {
+      qc.invalidateQueries({ queryKey: ["snapInbox"] });
+    };
+
+    socket.on("new_snap", handleNewSnap);
+    return () => {
+      socket.off("new_snap", handleNewSnap);
+    };
+  }, [user, qc]);
 
   if (!user) {
     return (
