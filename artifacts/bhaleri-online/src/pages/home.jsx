@@ -60,17 +60,63 @@ export default function Home() {
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&auto=format&fit=crop&q=80')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-primary/65 to-emerald-600/75" />
-        <div className="relative z-10 px-6 py-14 md:py-20 text-white">
+        <div className="relative z-10 px-6 py-10 md:py-16 text-white">
           <div className="max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm font-medium mb-4">
               🌿 भालेरी ऑनलाइन — डिजिटल ग्राम
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-3 drop-shadow-lg leading-tight">
+            <h1 className="text-4xl md:text-5xl font-extrabold mb-6 drop-shadow-lg leading-tight">
               Welcome to Bhaleri
             </h1>
-            <p className="text-white/85 text-base md:text-lg mb-8">
-              Apne gaon ke saath jude rahein — local services, community updates, aur bahut kuch
-            </p>
+
+            {/* Search bar — hero ke andar */}
+            <div className="relative mx-auto max-w-md mb-6">
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl px-4 py-3 focus-within:bg-white/30 transition-all">
+                <Search className="w-4 h-4 text-white/70 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="User naam se dhoondein…"
+                  value={searchQ}
+                  onChange={(e) => setSearchQ(e.target.value)}
+                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-white/60 text-white"
+                />
+                {searchQ && (
+                  <button onClick={() => { setSearchQ(""); setDebouncedQ(""); }} className="text-white/60 hover:text-white text-xs px-1">✕</button>
+                )}
+              </div>
+
+              {debouncedQ.length >= 2 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-2xl shadow-lg z-30 overflow-hidden max-h-72 overflow-y-auto text-left">
+                  {searchLoading ? (
+                    <div className="p-4 text-sm text-muted-foreground text-center">Dhoond raha hai…</div>
+                  ) : searchResults?.length === 0 ? (
+                    <div className="p-4 text-sm text-muted-foreground text-center">"{debouncedQ}" naam ka koi user nahi mila</div>
+                  ) : (
+                    <div className="divide-y">
+                      {searchResults?.map((person) => (
+                        <button
+                          key={person.id}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
+                          onClick={() => { setSearchQ(""); setDebouncedQ(""); setLocation(`/profile/${person.id}`); }}
+                        >
+                          <Avatar className="w-9 h-9 shrink-0">
+                            <AvatarImage src={person.avatarUrl || ""} />
+                            <AvatarFallback className="text-xs bg-primary/10 text-primary font-bold">
+                              {person.name.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">{person.name}</div>
+                            {person.section && <div className="text-xs text-muted-foreground truncate">{person.section}</div>}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-bold shadow-lg" asChild>
                 <Link href="/posts">
@@ -118,54 +164,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* User Search */}
-      <div className="relative">
-        <div className="flex items-center gap-2 bg-muted/60 border rounded-2xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary/40 transition-all">
-          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
-          <input
-            type="text"
-            placeholder="User naam se dhoondein…"
-            value={searchQ}
-            onChange={(e) => setSearchQ(e.target.value)}
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-          />
-          {searchQ && (
-            <button onClick={() => { setSearchQ(""); setDebouncedQ(""); }} className="text-muted-foreground hover:text-foreground text-xs px-1">✕</button>
-          )}
-          <UserSearch className="w-4 h-4 text-muted-foreground shrink-0" />
-        </div>
-
-        {debouncedQ.length >= 2 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-2xl shadow-lg z-30 overflow-hidden max-h-72 overflow-y-auto">
-            {searchLoading ? (
-              <div className="p-4 text-sm text-muted-foreground text-center">Dhoond raha hai…</div>
-            ) : searchResults?.length === 0 ? (
-              <div className="p-4 text-sm text-muted-foreground text-center">"{debouncedQ}" naam ka koi user nahi mila</div>
-            ) : (
-              <div className="divide-y">
-                {searchResults?.map((person) => (
-                  <button
-                    key={person.id}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
-                    onClick={() => { setSearchQ(""); setDebouncedQ(""); setLocation(`/profile/${person.id}`); }}
-                  >
-                    <Avatar className="w-9 h-9 shrink-0">
-                      <AvatarImage src={person.avatarUrl || ""} />
-                      <AvatarFallback className="text-xs bg-primary/10 text-primary font-bold">
-                        {person.name.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{person.name}</div>
-                      {person.section && <div className="text-xs text-muted-foreground truncate">{person.section}</div>}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
 
       {/* Recent Community Posts */}
       {recentPosts.length > 0 && (

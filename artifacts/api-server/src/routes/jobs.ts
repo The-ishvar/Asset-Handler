@@ -36,6 +36,7 @@ router.post("/", requireAuth, async (req, res) => {
   const { title, company, type, location, salary, contactPhone, contactNumber, description } = req.body;
   if (!title) { res.status(400).json({ error: "title required" }); return; }
   const [row] = await db.insert(jobsTable).values({
+    userId: req.user!.userId,
     title,
     description: description || null,
     contactNumber: contactPhone || contactNumber || "",
@@ -45,7 +46,13 @@ router.post("/", requireAuth, async (req, res) => {
   res.status(201).json(fmt(row));
 });
 
-router.patch("/:id", requireAdmin, async (req, res) => {
+router.patch("/:id", requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id as string);
+  const [existing] = await db.select().from(jobsTable).where(eq(jobsTable.id, id)).limit(1);
+  if (!existing) { res.status(404).json({ error: "Not found" }); return; }
+  if (existing.userId !== req.user!.userId && req.user!.role !== "admin" && req.user!.role !== "super_admin") {
+    res.status(403).json({ error: "Forbidden" }); return;
+  }
   const { title, description, location, salary, contactPhone, contactNumber } = req.body;
   const updates: Partial<typeof jobsTable.$inferInsert> = {};
   if (title !== undefined) updates.title = title;
@@ -53,13 +60,19 @@ router.patch("/:id", requireAdmin, async (req, res) => {
   if (location !== undefined) updates.location = location;
   if (salary !== undefined) updates.salary = salary;
   if (contactPhone !== undefined || contactNumber !== undefined) updates.contactNumber = contactPhone ?? contactNumber;
-  const [row] = await db.update(jobsTable).set(updates).where(eq(jobsTable.id, parseInt(req.params.id as string))).returning();
+  const [row] = await db.update(jobsTable).set(updates).where(eq(jobsTable.id, id)).returning();
   if (!row) { res.status(404).json({ error: "Not found" }); return; }
   res.json(fmt(row));
 });
 
-router.delete("/:id", requireAdmin, async (req, res) => {
-  await db.delete(jobsTable).where(eq(jobsTable.id, parseInt(req.params.id as string)));
+router.delete("/:id", requireAuth, async (req, res) => {
+  const id = parseInt(req.params.id as string);
+  const [existing] = await db.select().from(jobsTable).where(eq(jobsTable.id, id)).limit(1);
+  if (!existing) { res.status(404).json({ error: "Not found" }); return; }
+  if (existing.userId !== req.user!.userId && req.user!.role !== "admin" && req.user!.role !== "super_admin") {
+    res.status(403).json({ error: "Forbidden" }); return;
+  }
+  await db.delete(jobsTable).where(eq(jobsTable.id, id));
   res.status(204).end();
 });
 
