@@ -1,11 +1,10 @@
 import { pgTable, serial, integer, timestamp } from "drizzle-orm/pg-core";
 
-export const cartItemsTable = pgTable("cart_items", {
+export const wishlistTable = pgTable("wishlist", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   listingId: integer("listing_id").notNull(),
-  quantity: integer("quantity").notNull().default(1),
   addedAt: timestamp("added_at").defaultNow().notNull(),
 });
 
-export type CartItem = typeof cartItemsTable.$inferSelect;
+export type WishlistItem = typeof wishlistTable.$inferSelect;

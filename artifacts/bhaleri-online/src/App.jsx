@@ -43,6 +43,7 @@ import MessagesPage from "@/pages/messages/index";
 import ConversationPage from "@/pages/messages/conversation";
 import PublicProfile from "@/pages/profile/id";
 import CartPage from "@/pages/cart/index";
+import CheckoutPage from "@/pages/checkout";
 import MyShopPage from "@/pages/my-shop/index";
 import ShopView from "@/pages/my-shop/shop";
 import PostsPage from "@/pages/posts/index";
@@ -152,6 +153,7 @@ function Router() {
             <FeatureRoute path="/buy-sell/new" component={NewListing} featureKey="marketplace" />
             <FeatureRoute path="/buy-sell/:id" component={ListingDetail} featureKey="marketplace" />
             <FeatureRoute path="/cart" component={CartPage} featureKey="marketplace" />
+            <FeatureRoute path="/checkout" component={CheckoutPage} featureKey="marketplace" />
 
             <FeatureRoute path="/reels" component={Reels} featureKey="reels" />
             <FeatureRoute path="/reels/new" component={NewReel} featureKey="reels" />

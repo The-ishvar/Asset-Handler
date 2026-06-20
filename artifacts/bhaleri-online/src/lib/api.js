@@ -282,6 +282,72 @@ export function useDeleteListing() {
   });
 }
 
+export function useUpdateListing() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }) => api.patch(`/listings/${id}`, data).then((r) => r.data),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: ["listListings"] });
+      qc.invalidateQueries({ queryKey: ["getListing", id] });
+    },
+  });
+}
+
+export function useGetListingReviews(listingId, options = {}) {
+  return useQuery({
+    queryKey: ["listingReviews", listingId],
+    queryFn: () => api.get(`/listings/${listingId}/reviews`).then((r) => r.data),
+    enabled: !!listingId,
+    ...options,
+  });
+}
+
+export function useCreateReview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ listingId, rating, comment }) =>
+      api.post(`/listings/${listingId}/reviews`, { rating, comment }).then((r) => r.data),
+    onSuccess: (_, { listingId }) => {
+      qc.invalidateQueries({ queryKey: ["listingReviews", listingId] });
+      qc.invalidateQueries({ queryKey: ["getListing", listingId] });
+    },
+  });
+}
+
+// ─── Wishlist ─────────────────────────────────────────────────────────────────
+export function useGetWishlist(options = {}) {
+  return useQuery({
+    queryKey: ["wishlist"],
+    queryFn: () => api.get("/wishlist").then((r) => r.data),
+    ...options,
+  });
+}
+
+export function useToggleWishlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ listingId }) => api.post("/wishlist", { listingId }).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["wishlist"] }),
+  });
+}
+
+// ─── Orders ───────────────────────────────────────────────────────────────────
+export function useCreateOrder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.post("/orders", data).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["orders"] }),
+  });
+}
+
+export function useGetOrders(options = {}) {
+  return useQuery({
+    queryKey: ["orders"],
+    queryFn: () => api.get("/orders").then((r) => r.data),
+    ...options,
+  });
+}
+
 // ─── Buses ───────────────────────────────────────────────────────────────────
 export function useListBuses(options = {}) {
   return useQuery({
@@ -530,7 +596,7 @@ export function useGetCart(options = {}) {
 export function useAddToCart() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (listingId) => api.post("/cart", { listingId }).then((r) => r.data),
+    mutationFn: ({ listingId, quantity = 1 }) => api.post("/cart", { listingId, quantity }).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
   });
 }
@@ -539,6 +605,14 @@ export function useRemoveFromCart() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (listingId) => api.delete(`/cart/${listingId}`).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
+  });
+}
+
+export function useUpdateCartQuantity() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ listingId, quantity }) => api.patch(`/cart/${listingId}`, { quantity }).then((r) => r.data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
   });
 }

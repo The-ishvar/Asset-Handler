@@ -25,6 +25,8 @@ import snapsRouter from "./snaps";
 import storiesRouter from "./stories";
 import bookingsRouter from "./bookings";
 import featuresRouter from "./features";
+import wishlistRouter from "./wishlist";
+import ordersRouter from "./orders";
 
 const router: IRouter = Router();
 
@@ -54,5 +56,7 @@ router.use("/user-shops", userShopsRouter);
 router.use("/stories", storiesRouter);
 router.use("/bookings", bookingsRouter);
 router.use(featuresRouter);
+router.use("/wishlist", wishlistRouter);
+router.use("/orders", ordersRouter);
 
 export default router;
