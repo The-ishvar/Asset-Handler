@@ -1,0 +1,137 @@
+Upgrade the existing Marketplace (Buy & Sell) module of "Bhaleri Online" without changing the current app theme, colors, responsiveness, navigation, or overall UI style.
+
+The current Marketplace is incomplete:
+
+- No "Buy Now" button
+- No "Add to Cart" button
+- Listed products are not showing correctly
+- Product cards are not attractive
+- Product details page is missing
+- Search and filters are weak
+
+Redesign the Marketplace experience similar to Meesho, while keeping the existing Bhaleri Online theme.
+
+Requirements:
+
+HOME MARKETPLACE
+
+- Show products in a responsive 2-column mobile grid.
+- Add product cards with:
+  - Product image
+  - Product name
+  - Price
+  - Original price with discount percentage
+  - Seller name
+  - Village/location
+  - Rating and review count
+  - Stock status
+  - Wishlist icon
+
+- Add category tabs:
+  - Fashion
+  - Electronics
+  - Grocery
+  - Medical
+  - Home & Kitchen
+  - Farming
+  - Vehicles
+  - Services
+  - Others
+
+- Add a search bar with autocomplete suggestions.
+
+- Add filters:
+  - Price range
+  - Category
+  - Distance
+  - Rating
+  - Latest
+  - Popular
+
+PRODUCT DETAILS PAGE
+
+- Multiple product images with image slider.
+- Full description.
+- Product specifications.
+- Seller profile preview.
+- Seller contact button.
+- Related products section.
+- Similar items section.
+- Delivery information.
+- Available quantity.
+
+Buttons:
+
+- Add to Cart
+- Buy Now
+- Chat with Seller
+- Share Product
+
+CART SYSTEM
+
+- Create a complete cart page.
+- Users can:
+  - Increase quantity
+  - Decrease quantity
+  - Remove items
+  - Save for later
+
+- Show:
+  - Total amount
+  - Delivery charges
+  - Discount amount
+  - Final payable amount
+
+CHECKOUT FLOW
+
+Address → Review Order → Payment → Success Page
+
+PAYMENTS
+
+- Support Cash on Delivery.
+- Keep online payment integration ready for future use.
+
+SELLER FEATURES
+
+Users can list products with:
+
+- Product images from gallery upload (no URL input)
+- Product title
+- Description
+- Category
+- Price
+- Discount price
+- Quantity
+- Location
+- Delivery availability
+
+Create a "My Products" section inside the user profile.
+
+Seller can:
+
+- Edit products
+- Delete products
+- Mark as sold out
+- View orders
+- View earnings
+
+DATABASE REQUIREMENTS
+
+Store:
+
+- Products
+- Cart items
+- Orders
+- Wishlist
+- Reviews
+- Ratings
+
+Important:
+
+- Fix the existing issue where uploaded products are not appearing.
+- Ensure real-time updates after listing a product.
+- Keep everything mobile-first and fully responsive.
+- Maintain the current Bhaleri Online design system.
+- Do not change the existing navigation or theme.
+- Optimize images and loading speed.
+- Make the Marketplace production-ready.

@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
+import { FeatureProvider, FeatureGate } from "@/lib/features";
 import Layout from "@/components/layout";
 import AdminLayout from "@/components/admin-layout";
 import NotFound from "@/pages/not-found";
@@ -63,6 +64,7 @@ import AdminJobs from "@/pages/admin/jobs";
 import AdminEvents from "@/pages/admin/events";
 import AdminNotices from "@/pages/admin/notices";
 import AdminEmergency from "@/pages/admin/emergency";
+import AdminFeatures from "@/pages/admin/features";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +87,16 @@ function AdminRoute({ component: Component, path }) {
   );
 }
 
+function FeatureRoute({ component: Component, path, featureKey }) {
+  return (
+    <Route path={path}>
+      <FeatureGate featureKey={featureKey}>
+        <Component />
+      </FeatureGate>
+    </Route>
+  );
+}
+
 function Router() {
   return (
     <Switch>
@@ -99,58 +111,63 @@ function Router() {
       <AdminRoute path="/admin/events" component={AdminEvents} />
       <AdminRoute path="/admin/notices" component={AdminNotices} />
       <AdminRoute path="/admin/emergency" component={AdminEmergency} />
+      <AdminRoute path="/admin/features" component={AdminFeatures} />
 
       <Route>
         <Layout>
           <Switch>
             <Route path="/" component={Home} />
             <Route path="/search" component={Search} />
-            <Route path="/about" component={About} />
             <Route path="/login" component={Login} />
             <Route path="/register" component={Register} />
             <Route path="/forgot-password" component={ForgotPassword} />
             <Route path="/profile" component={Profile} />
-            <Route path="/map" component={VillageMap} />
-
-            <Route path="/schools" component={SchoolsList} />
-            <Route path="/schools/:id" component={SchoolDetail} />
-
-            <Route path="/medical" component={MedicalList} />
-            <Route path="/medical/:id" component={MedicalDetail} />
-
-            <Route path="/shops" component={ShopsList} />
-            <Route path="/shops/:id" component={ShopDetail} />
-
-            <Route path="/buses" component={BusList} />
-            <Route path="/jobs" component={JobsList} />
-            <Route path="/jobs/new" component={NewJob} />
-            <Route path="/jobs/:id" component={JobDetail} />
-            <Route path="/events" component={EventsList} />
-            <Route path="/notices" component={NoticesList} />
-            <Route path="/emergency" component={EmergencyList} />
-
-            <Route path="/buy-sell" component={BuySellList} />
-            <Route path="/buy-sell/new" component={NewListing} />
-            <Route path="/buy-sell/:id" component={ListingDetail} />
-
-            <Route path="/reels" component={Reels} />
-            <Route path="/reels/new" component={NewReel} />
-            <Route path="/notifications" component={NotificationsPage} />
-            <Route path="/messages" component={MessagesPage} />
-            <Route path="/messages/:userId" component={ConversationPage} />
             <Route path="/profile/:id" component={PublicProfile} />
 
-            <Route path="/cart" component={CartPage} />
-            <Route path="/my-shop" component={MyShopPage} />
-            <Route path="/snaps" component={SnapsPage} />
-            <Route path="/shop/:id" component={ShopView} />
-            <Route path="/posts" component={PostsPage} />
+            <FeatureRoute path="/about" component={About} featureKey="about" />
+            <FeatureRoute path="/map" component={VillageMap} featureKey="map" />
 
-            <Route path="/book/auto" component={BookAuto} />
-            <Route path="/book/bus" component={BookBus} />
-            <Route path="/book/event" component={BookEvent} />
-            <Route path="/book/medical" component={BookMedical} />
-            <Route path="/provider" component={ProviderDashboard} />
+            <FeatureRoute path="/schools" component={SchoolsList} featureKey="schools" />
+            <FeatureRoute path="/schools/:id" component={SchoolDetail} featureKey="schools" />
+
+            <FeatureRoute path="/medical" component={MedicalList} featureKey="medical" />
+            <FeatureRoute path="/medical/:id" component={MedicalDetail} featureKey="medical" />
+
+            <FeatureRoute path="/shops" component={ShopsList} featureKey="shops" />
+            <FeatureRoute path="/shops/:id" component={ShopDetail} featureKey="shops" />
+            <FeatureRoute path="/my-shop" component={MyShopPage} featureKey="shops" />
+            <FeatureRoute path="/shop/:id" component={ShopView} featureKey="shops" />
+
+            <FeatureRoute path="/buses" component={BusList} featureKey="busBooking" />
+
+            <FeatureRoute path="/jobs" component={JobsList} featureKey="jobs" />
+            <FeatureRoute path="/jobs/new" component={NewJob} featureKey="jobs" />
+            <FeatureRoute path="/jobs/:id" component={JobDetail} featureKey="jobs" />
+
+            <FeatureRoute path="/events" component={EventsList} featureKey="events" />
+            <FeatureRoute path="/notices" component={NoticesList} featureKey="notices" />
+            <FeatureRoute path="/emergency" component={EmergencyList} featureKey="emergency" />
+
+            <FeatureRoute path="/buy-sell" component={BuySellList} featureKey="marketplace" />
+            <FeatureRoute path="/buy-sell/new" component={NewListing} featureKey="marketplace" />
+            <FeatureRoute path="/buy-sell/:id" component={ListingDetail} featureKey="marketplace" />
+            <FeatureRoute path="/cart" component={CartPage} featureKey="marketplace" />
+
+            <FeatureRoute path="/reels" component={Reels} featureKey="reels" />
+            <FeatureRoute path="/reels/new" component={NewReel} featureKey="reels" />
+
+            <FeatureRoute path="/notifications" component={NotificationsPage} featureKey="notifications" />
+            <FeatureRoute path="/messages" component={MessagesPage} featureKey="messages" />
+            <FeatureRoute path="/messages/:userId" component={ConversationPage} featureKey="messages" />
+
+            <FeatureRoute path="/snaps" component={SnapsPage} featureKey="snaps" />
+            <FeatureRoute path="/posts" component={PostsPage} featureKey="posts" />
+
+            <FeatureRoute path="/book/auto" component={BookAuto} featureKey="autoBooking" />
+            <FeatureRoute path="/book/bus" component={BookBus} featureKey="busBooking" />
+            <FeatureRoute path="/book/event" component={BookEvent} featureKey="bookEvent" />
+            <FeatureRoute path="/book/medical" component={BookMedical} featureKey="medical" />
+            <FeatureRoute path="/provider" component={ProviderDashboard} featureKey="provider" />
 
             <Route component={NotFound} />
           </Switch>
@@ -165,12 +182,14 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <TooltipProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-            <Toaster />
-          </TooltipProvider>
+          <FeatureProvider>
+            <TooltipProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Router />
+              </WouterRouter>
+              <Toaster />
+            </TooltipProvider>
+          </FeatureProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

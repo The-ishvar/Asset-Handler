@@ -3,11 +3,11 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import {
   LayoutDashboard, Users, ShoppingBag, School, Stethoscope,
-  Store, Bus, Briefcase, Calendar, Bell, AlertTriangle, LogOut, ArrowLeft
+  Store, Bus, Briefcase, Calendar, Bell, AlertTriangle, LogOut, ArrowLeft, Zap
 } from "lucide-react";
 import { Button } from "./ui/button";
 
-const adminLinks = [
+const BASE_ADMIN_LINKS = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Listings", href: "/admin/listings", icon: ShoppingBag },
@@ -19,6 +19,10 @@ const adminLinks = [
   { label: "Events", href: "/admin/events", icon: Calendar },
   { label: "Notices", href: "/admin/notices", icon: Bell },
   { label: "Emergency", href: "/admin/emergency", icon: AlertTriangle },
+];
+
+const SUPER_ADMIN_LINKS = [
+  { label: "Feature Toggles", href: "/admin/features", icon: Zap },
 ];
 
 export default function AdminLayout({ children }) {
@@ -39,6 +43,11 @@ export default function AdminLayout({ children }) {
     );
   }
 
+  const adminLinks = [
+    ...BASE_ADMIN_LINKS,
+    ...(user.role === "super_admin" ? SUPER_ADMIN_LINKS : []),
+  ];
+
   return (
     <div className="min-h-screen bg-background flex">
       <aside className="hidden md:flex w-64 flex-col border-r bg-card/50 fixed h-screen">
@@ -48,6 +57,13 @@ export default function AdminLayout({ children }) {
             🏡 Bhaleri Admin
           </Link>
           <div className="mt-2 text-xs text-muted-foreground">{user.name}</div>
+          {user.role === "super_admin" && (
+            <div className="mt-1">
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded-full">
+                <Zap className="w-3 h-3" /> Super Admin
+              </span>
+            </div>
+          )}
         </div>
         <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {adminLinks.map((link) => {

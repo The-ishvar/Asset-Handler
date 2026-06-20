@@ -872,3 +872,21 @@ export function useRecordStoryView() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["listStories"] }),
   });
 }
+
+// ─── Features ─────────────────────────────────────────────────────────────────
+export function useGetFeatures(options = {}) {
+  return useQuery({
+    queryKey: ["features"],
+    queryFn: () => api.get("/features").then((r) => r.data),
+    staleTime: 1000 * 60 * 2,
+    ...options,
+  });
+}
+
+export function useUpdateFeatures() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.patch("/features", data).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["features"] }),
+  });
+}

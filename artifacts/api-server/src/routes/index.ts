@@ -24,6 +24,7 @@ import postsRouter from "./posts";
 import snapsRouter from "./snaps";
 import storiesRouter from "./stories";
 import bookingsRouter from "./bookings";
+import featuresRouter from "./features";
 
 const router: IRouter = Router();
 
@@ -52,5 +53,6 @@ router.use("/cart", cartRouter);
 router.use("/user-shops", userShopsRouter);
 router.use("/stories", storiesRouter);
 router.use("/bookings", bookingsRouter);
+router.use(featuresRouter);
 
 export default router;
