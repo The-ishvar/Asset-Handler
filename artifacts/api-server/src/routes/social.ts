@@ -74,6 +74,25 @@ router.post("/users/:id/follow", requireAuth, async (req, res) => {
   res.json({ following: !existing, followerCount: followers.length });
 });
 
+// GET /users/me/following — list of users I follow (with their profile info)
+router.get("/users/me/following", requireAuth, async (req, res) => {
+  try {
+    const followerId = req.user!.userId;
+    const rows = await db
+      .select({
+        id: usersTable.id,
+        name: usersTable.name,
+        avatarUrl: usersTable.avatarUrl,
+      })
+      .from(followsTable)
+      .leftJoin(usersTable, eq(followsTable.followingId, usersTable.id))
+      .where(eq(followsTable.followerId, followerId));
+    res.json(rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // PATCH /users/me/update-profile — update own bio, avatar, cover
 router.patch("/users/me/update-profile", requireAuth, async (req, res) => {
   const { bio, avatarUrl, coverUrl } = req.body;

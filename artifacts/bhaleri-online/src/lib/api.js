@@ -716,10 +716,29 @@ export function useGetSnapSent(options = {}) {
   });
 }
 
+export function useGetMyFollowing(options = {}) {
+  return useQuery({
+    queryKey: ["myFollowing"],
+    queryFn: () => api.get("/users/me/following").then((r) => r.data),
+    ...options,
+  });
+}
+
 export function useSendSnap() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data) => api.post("/snaps", data).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["snapInbox"] });
+      qc.invalidateQueries({ queryKey: ["snapSent"] });
+    },
+  });
+}
+
+export function useSendSnapBulk() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => api.post("/snaps/bulk", data).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["snapInbox"] });
       qc.invalidateQueries({ queryKey: ["snapSent"] });

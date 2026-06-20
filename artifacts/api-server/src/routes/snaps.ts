@@ -6,7 +6,7 @@ import { requireAuth } from "../middlewares/auth";
 
 const router = Router();
 
-// Send a snap
+// Send a snap (single)
 router.post("/snaps", requireAuth, async (req: any, res) => {
   try {
     const { receiverId, mediaUrl, caption } = req.body;
@@ -19,6 +19,29 @@ router.post("/snaps", requireAuth, async (req: any, res) => {
       caption: caption || null,
     }).returning();
     res.json(snap);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Send snap to multiple recipients at once
+router.post("/snaps/bulk", requireAuth, async (req: any, res) => {
+  try {
+    const { receiverIds, mediaUrl, caption } = req.body;
+    if (!receiverIds || !Array.isArray(receiverIds) || receiverIds.length === 0) {
+      return res.status(400).json({ error: "receiverIds array required" });
+    }
+    if (!mediaUrl && !caption) return res.status(400).json({ error: "mediaUrl or caption required" });
+
+    const rows = receiverIds.map((rid: number) => ({
+      senderId: req.user.id,
+      receiverId: Number(rid),
+      mediaUrl: mediaUrl || null,
+      caption: caption || null,
+    }));
+
+    const snaps = await db.insert(snapsTable).values(rows).returning();
+    res.json({ sent: snaps.length });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
