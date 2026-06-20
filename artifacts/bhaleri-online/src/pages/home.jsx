@@ -54,8 +54,38 @@ export default function Home() {
 
   const sections = ALL_SECTIONS.filter((s) => isEnabled(s.featureKey));
 
+  const latestNotice = recentNotices[0] ?? null;
+
   return (
     <div className="space-y-8">
+
+      {/* 📢 Bold Admin Notice Banner */}
+      {isEnabled("notices") && latestNotice && (
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-yellow-400 shadow-lg">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%)", backgroundSize: "8px 8px" }} />
+          <div className="relative px-5 py-4 flex items-start gap-4">
+            <div className="shrink-0 mt-0.5 w-10 h-10 rounded-full bg-white/25 flex items-center justify-center">
+              <Bell className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">📢 Admin Notice</span>
+                <span className="text-[10px] text-white/70">
+                  {new Date(latestNotice.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                </span>
+              </div>
+              <div className="text-white font-extrabold text-lg leading-snug drop-shadow">{latestNotice.title}</div>
+              {latestNotice.content && (
+                <div className="text-white/90 text-sm mt-1 line-clamp-2">{latestNotice.content}</div>
+              )}
+            </div>
+            <Link href="/notices" className="shrink-0 mt-1 text-[11px] font-bold text-white/80 hover:text-white underline underline-offset-2 whitespace-nowrap">
+              Sab dekhein →
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden">
         <div

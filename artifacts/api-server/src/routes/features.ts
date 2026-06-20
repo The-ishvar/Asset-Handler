@@ -19,7 +19,7 @@ export const DEFAULT_FEATURES: Record<string, boolean> = {
   emergency: true,
   jobs: false,
   events: false,
-  notices: false,
+  notices: true,
   snaps: false,
   messages: true,
   notifications: true,
