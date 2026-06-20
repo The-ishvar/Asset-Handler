@@ -73,6 +73,24 @@ export function useForgotPassword() {
   });
 }
 
+export function useVerifyOtp() {
+  return useMutation({
+    mutationFn: (data) => api.post("/auth/verify-otp", data).then((r) => r.data),
+  });
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: (data) => api.post("/auth/reset-password", data).then((r) => r.data),
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (data) => api.post("/auth/change-password", data).then((r) => r.data),
+  });
+}
+
 // ─── Users ───────────────────────────────────────────────────────────────────
 export function useListUsers(options = {}) {
   return useQuery({

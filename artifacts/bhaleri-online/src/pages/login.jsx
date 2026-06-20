@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useLogin } from "@/lib/api";
@@ -9,10 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Phone, Lock } from "lucide-react";
 
+const LS_REMEMBER_KEY = "bhaleri_remember_phone";
+
 export default function Login() {
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(() => localStorage.getItem(LS_REMEMBER_KEY) || "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem(LS_REMEMBER_KEY));
   const { login } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -23,6 +26,11 @@ export default function Login() {
     if (!phone.trim() || !password.trim()) {
       toast({ title: "Phone aur password dono chahiye", variant: "destructive" });
       return;
+    }
+    if (rememberMe) {
+      localStorage.setItem(LS_REMEMBER_KEY, phone.trim());
+    } else {
+      localStorage.removeItem(LS_REMEMBER_KEY);
     }
     loginMutation.mutate(
       { phone: phone.trim(), password },
@@ -92,22 +100,31 @@ export default function Login() {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full h-11 text-base" disabled={loginMutation.isPending}>
-              {loginMutation.isPending ? "Login ho raha hai..." : "Login"}
-            </Button>
-          </form>
-          <div className="mt-5 space-y-3 text-center text-sm text-muted-foreground">
-            <div>
+
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-primary accent-primary cursor-pointer"
+                />
+                <span className="text-muted-foreground">Mujhe yaad rakho</span>
+              </label>
               <Link href="/forgot-password" className="text-primary hover:underline font-medium">
                 Password bhool gaye?
               </Link>
             </div>
-            <div>
-              Account nahi hai?{" "}
-              <Link href="/register" className="text-primary hover:underline font-medium">
-                Register karein
-              </Link>
-            </div>
+
+            <Button type="submit" className="w-full h-11 text-base" disabled={loginMutation.isPending}>
+              {loginMutation.isPending ? "Login ho raha hai..." : "Login"}
+            </Button>
+          </form>
+          <div className="mt-5 text-center text-sm text-muted-foreground">
+            Account nahi hai?{" "}
+            <Link href="/register" className="text-primary hover:underline font-medium">
+              Register karein
+            </Link>
           </div>
         </CardContent>
       </Card>

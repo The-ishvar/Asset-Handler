@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useCreateBooking, useListBuses } from "@/lib/api";
 import { useLocation } from "wouter";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Bus, ChevronRight, IndianRupee } from "lucide-react";
+import { Bus, ChevronRight, IndianRupee, MapPin, Clock } from "lucide-react";
 import BookingConfirmation from "@/components/booking/BookingConfirmation";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,12 +15,20 @@ const SEAT_CLASSES = [
   { label: "Reserved", price: 60 },
 ];
 
+const DEMO_BUSES = [
+  { id: "db1", from: "Bhaleri", to: "Jaipur", operator: "Rajasthan Roadways", departureTime: "06:00 AM", arrivalTime: "09:30 AM", seatsAvailable: 28, isDemo: true },
+  { id: "db2", from: "Bhaleri", to: "Alwar", operator: "Haryana Express", departureTime: "08:30 AM", arrivalTime: "10:00 AM", seatsAvailable: 14, isDemo: true },
+  { id: "db3", from: "Bhaleri", to: "Delhi", operator: "Volvo AC Express", departureTime: "10:00 AM", arrivalTime: "02:30 PM", seatsAvailable: 8, isDemo: true },
+  { id: "db4", from: "Bhaleri", to: "Rewari", operator: "Mini Bus", departureTime: "12:00 PM", arrivalTime: "01:00 PM", seatsAvailable: 22, isDemo: true },
+  { id: "db5", from: "Bhaleri", to: "Bhiwadi", operator: "Local Shuttle", departureTime: "03:00 PM", arrivalTime: "04:30 PM", seatsAvailable: 18, isDemo: true },
+];
+
 export default function BookBus() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const createBooking = useCreateBooking();
-  const { data: buses = [] } = useListBuses();
+  const { data: dbBuses = [] } = useListBuses();
 
   const [selectedBus, setSelectedBus] = useState(null);
   const [date, setDate] = useState("");
@@ -28,8 +36,11 @@ export default function BookBus() {
   const [qty, setQty] = useState(1);
   const [confirmed, setConfirmed] = useState(null);
 
-  if (!user) { setLocation("/login"); return null; }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
+  const buses = dbBuses.length > 0 ? dbBuses : DEMO_BUSES;
+  const isDemo = dbBuses.length === 0;
   const classPrice = SEAT_CLASSES.find(c => c.label === seatClass)?.price || 30;
   const totalFare = classPrice * qty;
 
@@ -43,14 +54,14 @@ export default function BookBus() {
       bookingType: "bus",
       amount: totalFare,
       details: {
-        busId: selectedBus.id,
+        busId: isDemo ? selectedBus.id : selectedBus.id,
         busRoute: `${selectedBus.from} → ${selectedBus.to}`,
         providerName: selectedBus.operator,
-        date,
-        seatClass,
-        qty,
+        date, seatClass, qty,
         fare: totalFare,
         departureTime: selectedBus.departureTime,
+        arrivalTime: selectedBus.arrivalTime,
+        seatsBooked: qty,
       },
     }, {
       onSuccess: (b) => setConfirmed(b),
@@ -70,29 +81,40 @@ export default function BookBus() {
         </div>
       </div>
 
+      {isDemo && (
+        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-700 dark:text-amber-400">
+          🧪 <strong>Sample Data</strong> — No bus routes in database yet. Demo routes shown for preview.
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-5">
         <Card>
           <CardContent className="pt-5 space-y-3">
             <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Select Bus Route</h3>
-            {buses.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No bus routes available.</p>
-            ) : (
-              <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                {buses.map(bus => (
-                  <button
-                    key={bus.id}
-                    type="button"
-                    onClick={() => setSelectedBus(bus)}
-                    className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-colors ${selectedBus?.id === bus.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"}`}
-                  >
+            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              {buses.map(bus => (
+                <button
+                  key={bus.id}
+                  type="button"
+                  onClick={() => setSelectedBus(bus)}
+                  className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-colors ${selectedBus?.id === bus.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"}`}
+                >
+                  <div className="flex items-center justify-between">
                     <div className="font-medium text-sm">{bus.from} → {bus.to}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {bus.operator} · Departs {bus.departureTime}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+                    {bus.seatsAvailable !== undefined && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${bus.seatsAvailable > 10 ? "bg-green-100 text-green-700" : bus.seatsAvailable > 0 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
+                        {bus.seatsAvailable} seats
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1 flex items-center gap-3">
+                    <span>{bus.operator}</span>
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {bus.departureTime}</span>
+                    {bus.arrivalTime && <span>→ {bus.arrivalTime}</span>}
+                  </div>
+                </button>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
@@ -115,7 +137,7 @@ export default function BookBus() {
                     onClick={() => setSeatClass(c.label)}
                     className={`flex-1 px-3 py-2 rounded-xl border-2 text-sm font-medium transition-colors ${seatClass === c.label ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"}`}
                   >
-                    {c.label}<br /><span className="text-xs font-normal text-muted-foreground">₹{c.price}</span>
+                    {c.label}<br /><span className="text-xs font-normal text-muted-foreground">₹{c.price}/seat</span>
                   </button>
                 ))}
               </div>
@@ -134,8 +156,16 @@ export default function BookBus() {
 
         {selectedBus && (
           <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex justify-between items-center">
+            <CardContent className="pt-4 pb-4 space-y-1">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Route</span>
+                <span className="font-medium">{selectedBus.from} → {selectedBus.to}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Departure</span>
+                <span className="font-medium">{selectedBus.departureTime}</span>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t mt-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <IndianRupee className="w-4 h-4" />
                   Total ({qty} × ₹{classPrice})

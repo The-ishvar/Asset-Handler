@@ -1,0 +1,132 @@
+Upgrade the Booking and Authentication modules in Bhaleri Online without changing the existing theme, colors, navigation, responsiveness, animations, or overall UI design.
+
+Create a complete booking system for:
+
+* Auto/Tempo rides
+* Bus tickets
+* Medical appointments
+* Event tickets
+
+BOOKING FEATURES
+
+Users can:
+
+* Search available services
+* Select pickup and destination locations
+* Choose date and time
+* View estimated fare before booking
+* Confirm or cancel bookings
+* Track booking status in real time
+* View booking history in their profile
+* Download or share booking details
+
+BOOKING STATUS FLOW
+
+Pending → Accepted → Confirmed → Completed
+
+Additional statuses:
+
+* Cancelled
+* Rejected
+
+AUTO BOOKING
+
+* Show nearby auto and tempo providers
+* Display driver photo, vehicle number, rating, and fare estimate
+* Allow users to call or chat with drivers
+* Show live booking status updates
+
+BUS BOOKING
+
+* Show available buses with routes and timings
+* Display seat availability
+* Allow seat selection
+* Generate a digital ticket after successful booking
+
+MEDICAL APPOINTMENTS
+
+* Show doctors, clinics, and available time slots
+* Allow appointment booking and cancellation
+
+EVENT TICKETS
+
+* Show upcoming events
+* Display ticket price and available seats
+* Generate a QR code ticket after booking
+
+MY BOOKINGS
+
+Create a dedicated "My Bookings" section inside the user profile with tabs for:
+
+* Auto Bookings
+* Bus Tickets
+* Medical Appointments
+* Event Tickets
+
+Each booking must display:
+
+* Booking ID
+* Provider name
+* Date and time
+* Amount paid
+* Booking status
+* Payment status
+
+PROVIDER DASHBOARD
+
+Drivers, bus operators, doctors, and event organizers can:
+
+* Accept or reject bookings
+* Mark bookings as completed
+* View earnings
+* View booking history
+* Contact users through chat
+
+NOTIFICATIONS
+
+Send real-time notifications when:
+
+* A booking is created
+* A booking is accepted or rejected
+* A booking is completed
+* A booking is cancelled
+
+AUTHENTICATION
+
+Improve the login system and add:
+
+* Forgot Password
+* Reset Password via OTP
+* OTP verification using mobile number or email
+* Resend OTP option
+* Strong password validation
+* Show/hide password button
+* Remember Me option
+* Secure logout from all devices
+
+ADMIN CONTROLS
+
+Admin can:
+
+* View all bookings
+* View all users
+* View all providers
+* Block or unblock users
+* Manage booking disputes
+* Enable or disable booking modules individually
+
+If any booking module is disabled by admin, hide it automatically from the app.
+
+EMPTY STATE RULES
+
+* Never show blank pages
+* Show sample data when the database is empty
+* Clearly label sample data
+
+IMPORTANT
+
+* Keep everything mobile-first and fully responsive
+* Preserve the existing UI and theme
+* Do not change the current design system
+* Ensure all actions work without page refresh
+* Make the booking system production-ready

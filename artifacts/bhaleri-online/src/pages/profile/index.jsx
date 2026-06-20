@@ -11,10 +11,119 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Settings, LogOut, Shield, Plus, Play, Edit3, Phone, Mail, CalendarClock, ClipboardList } from "lucide-react";
+import { Package, Settings, LogOut, Shield, Plus, Play, Edit3, Phone, Mail, CalendarClock, ClipboardList, Lock, Eye, EyeOff } from "lucide-react";
 import MyBookings from "@/components/booking/MyBookings";
-import { useProviderDashboard } from "@/lib/api";
+import { useProviderDashboard, useChangePassword } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
+
+function SettingsTab({ user, logout, setLocation }) {
+  const { toast } = useToast();
+  const changePw = useChangePassword();
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+
+  function getStrength(pw) {
+    if (!pw) return null;
+    const score = [pw.length >= 8, /[A-Z]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)].filter(Boolean).length;
+    if (score <= 1) return { label: "Kamzor", color: "bg-red-500", width: "25%" };
+    if (score === 2) return { label: "Theek", color: "bg-yellow-500", width: "50%" };
+    if (score === 3) return { label: "Achha", color: "bg-blue-500", width: "75%" };
+    return { label: "Mazboot", color: "bg-green-500", width: "100%" };
+  }
+
+  const strength = getStrength(newPw);
+
+  function handleChangePw(e) {
+    e.preventDefault();
+    if (newPw !== confirmPw) { toast({ title: "Passwords match nahi ho rahe", variant: "destructive" }); return; }
+    if (newPw.length < 6) { toast({ title: "Password kam se kam 6 characters ka hona chahiye", variant: "destructive" }); return; }
+    changePw.mutate({ currentPassword: currentPw, newPassword: newPw }, {
+      onSuccess: () => {
+        toast({ title: "Password change ho gaya!" });
+        setCurrentPw(""); setNewPw(""); setConfirmPw("");
+      },
+      onError: (err) => toast({ title: err.message || "Password change failed", variant: "destructive" }),
+    });
+  }
+
+  return (
+    <div className="max-w-md space-y-4">
+      <div className="p-4 bg-muted/30 rounded-xl space-y-3">
+        <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Account Info</h4>
+        <div><div className="text-xs text-muted-foreground">Phone</div><div className="font-medium">{user.phone}</div></div>
+        <div><div className="text-xs text-muted-foreground">Role</div><div className="font-medium capitalize">{user.role}</div></div>
+        <div><div className="text-xs text-muted-foreground">Member since</div><div className="font-medium">{new Date(user.createdAt).toLocaleDateString("en-IN", { year: "numeric", month: "long" })}</div></div>
+      </div>
+
+      <form onSubmit={handleChangePw} className="p-4 bg-muted/30 rounded-xl space-y-3">
+        <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+          <Lock className="w-4 h-4" /> Password Change Karein
+        </h4>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Current Password</Label>
+          <div className="relative">
+            <Input
+              type={showCurrent ? "text" : "password"}
+              placeholder="••••••••"
+              value={currentPw}
+              onChange={e => setCurrentPw(e.target.value)}
+              className="pr-9"
+              required
+            />
+            <button type="button" onClick={() => setShowCurrent(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Naya Password</Label>
+          <div className="relative">
+            <Input
+              type={showNew ? "text" : "password"}
+              placeholder="Naya password"
+              value={newPw}
+              onChange={e => setNewPw(e.target.value)}
+              className="pr-9"
+              required
+            />
+            <button type="button" onClick={() => setShowNew(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          {strength && (
+            <div className="space-y-0.5">
+              <div className="h-1 bg-muted rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all ${strength.color}`} style={{ width: strength.width }} />
+              </div>
+              <div className="text-xs text-muted-foreground">Strength: <span className="font-medium text-foreground">{strength.label}</span></div>
+            </div>
+          )}
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Password Confirm Karein</Label>
+          <Input
+            type="password"
+            placeholder="Dobara likhein"
+            value={confirmPw}
+            onChange={e => setConfirmPw(e.target.value)}
+            required
+          />
+          {confirmPw && newPw !== confirmPw && <p className="text-xs text-red-500">Passwords match nahi ho rahe</p>}
+        </div>
+        <Button type="submit" className="w-full" size="sm" disabled={changePw.isPending || newPw !== confirmPw || !currentPw}>
+          {changePw.isPending ? "Change ho raha hai..." : "Password Change Karein"}
+        </Button>
+      </form>
+
+      <Button variant="destructive" className="w-full" onClick={() => { logout(); setLocation("/"); }}>
+        <LogOut className="w-4 h-4 mr-2" /> Sign Out
+      </Button>
+    </div>
+  );
+}
 
 export default function Profile() {
   const { user, logout, login, token } = useAuth();
@@ -271,17 +380,7 @@ export default function Profile() {
         </TabsContent>
 
         <TabsContent value="settings" className="p-4 mt-0">
-          <div className="max-w-md space-y-4">
-            <div className="p-4 bg-muted/30 rounded-xl space-y-3">
-              <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Account Info</h4>
-              <div><div className="text-xs text-muted-foreground">Phone</div><div className="font-medium">{user.phone}</div></div>
-              <div><div className="text-xs text-muted-foreground">Role</div><div className="font-medium capitalize">{user.role}</div></div>
-              <div><div className="text-xs text-muted-foreground">Member since</div><div className="font-medium">{new Date(user.createdAt).toLocaleDateString("en-IN", { year: "numeric", month: "long" })}</div></div>
-            </div>
-            <Button variant="destructive" className="w-full" onClick={() => { logout(); setLocation("/"); }}>
-              <LogOut className="w-4 h-4 mr-2" /> Sign Out
-            </Button>
-          </div>
+          <SettingsTab user={user} logout={logout} setLocation={setLocation} />
         </TabsContent>
       </Tabs>
     </div>
