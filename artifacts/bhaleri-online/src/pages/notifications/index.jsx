@@ -24,7 +24,8 @@ export default function Notifications() {
   const markAll = useMarkAllNotificationsRead();
   const markOne = useMarkNotificationRead();
 
-  if (!user) { setLocation("/login"); return null; }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
   const unreadCount = notifications?.filter((n) => !n.isRead).length ?? 0;
 

@@ -68,9 +68,9 @@ export function FeatureGate({ featureKey, children }) {
       <div className="flex items-center justify-center min-h-[60vh] px-4">
         <div className="text-center space-y-4 max-w-sm">
           <div className="text-6xl">🚧</div>
-          <h2 className="text-2xl font-bold text-foreground">Feature Unavailable</h2>
+          <h2 className="text-2xl font-bold text-foreground">Abhi Unavailable Hai</h2>
           <p className="text-muted-foreground">
-            This feature is currently unavailable.
+            Yeh feature filhaal available nahi hai. Admin se contact karein.
           </p>
         </div>
       </div>

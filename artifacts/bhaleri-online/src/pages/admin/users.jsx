@@ -23,7 +23,7 @@ export default function AdminUsers() {
     if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
     deleteUser.mutate({ id }, {
       onSuccess: () => { toast({ title: "User deleted" }); refetch(); },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
@@ -31,7 +31,7 @@ export default function AdminUsers() {
     const newRole = user.role === "admin" ? "user" : user.role === "user" ? "admin" : "user";
     updateUser.mutate({ id: user.id, data: { role: newRole } }, {
       onSuccess: () => { toast({ title: `Role updated to ${newRole}` }); refetch(); },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 

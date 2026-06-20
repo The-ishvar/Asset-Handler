@@ -154,7 +154,7 @@ export default function ListingDetail() {
       { receiverId: listing.userId, content: `Hi! I'm interested in buying "${listing.title}" listed at ₹${Number(listing.price).toLocaleString("en-IN")}. Is it still available?` },
       {
         onSuccess: () => { toast({ title: "Message sent to seller!" }); setLocation(`/messages/${listing.userId}`); },
-        onError: () => toast({ title: "Could not send message", variant: "destructive" }),
+        onError: () => toast({ title: "Message nahi bheja ja saka", variant: "destructive" }),
       }
     );
   };
@@ -164,14 +164,14 @@ export default function ListingDetail() {
     if (isInCart) { setLocation("/cart"); return; }
     addToCart.mutate({ listingId: id }, {
       onSuccess: () => toast({ title: "Added to cart!" }),
-      onError: (err) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
   const handleWishlist = () => {
     if (!user) { setLocation("/login"); return; }
     toggleWishlist.mutate({ listingId: id }, {
-      onError: () => toast({ title: "Error", variant: "destructive" }),
+      onError: () => toast({ title: "Kuch gadbad ho gayi", variant: "destructive" }),
     });
   };
 
@@ -188,7 +188,7 @@ export default function ListingDetail() {
   const handleReview = (e) => {
     e.preventDefault();
     if (!user) { setLocation("/login"); return; }
-    if (!reviewRating) { toast({ title: "Please select a rating", variant: "destructive" }); return; }
+    if (!reviewRating) { toast({ title: "Rating zaroor chunein", variant: "destructive" }); return; }
     createReview.mutate(
       { listingId: id, rating: reviewRating, comment: reviewComment || null },
       {
@@ -199,7 +199,7 @@ export default function ListingDetail() {
           qc.invalidateQueries({ queryKey: ["listingReviews", id] });
           qc.invalidateQueries({ queryKey: ["getListing", id] });
         },
-        onError: (err) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+        onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
       }
     );
   };

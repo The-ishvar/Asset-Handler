@@ -188,14 +188,14 @@ export default function BuySellList() {
     if (cartListingIds.has(listingId)) { setLocation("/cart"); return; }
     addToCart.mutate({ listingId }, {
       onSuccess: () => toast({ title: "Added to cart!" }),
-      onError: (e) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+      onError: (e) => toast({ title: "Kuch gadbad ho gayi", description: e.message, variant: "destructive" }),
     });
   }, [user, cartListingIds, addToCart, toast, setLocation]);
 
   const handleWishlist = useCallback((listingId) => {
     if (!user) { setLocation("/login"); return; }
     toggleWishlist.mutate({ listingId }, {
-      onError: (e) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+      onError: (e) => toast({ title: "Kuch gadbad ho gayi", description: e.message, variant: "destructive" }),
     });
   }, [user, toggleWishlist, toast, setLocation]);
 
@@ -224,7 +224,7 @@ export default function BuySellList() {
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input placeholder="Search products, sellers, locations…" className="pl-9 h-9 text-sm"
+          <Input placeholder="Saman, seller, jagah dhoondein…" className="pl-9 h-9 text-sm"
             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           {searchQuery && (
             <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -329,7 +329,7 @@ export default function BuySellList() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-20 bg-muted/20 rounded-xl border border-dashed">
           <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
-          <p className="text-muted-foreground font-medium">No products found</p>
+          <p className="text-muted-foreground font-medium">Koi product nahi mila</p>
           <p className="text-sm text-muted-foreground mt-1">Try a different category or search term</p>
           {(hasFilters || activeCategory !== "All" || searchQuery) && (
             <Button variant="ghost" size="sm" className="mt-3" onClick={() => { clearFilters(); setActiveCategory("All"); setSearchQuery(""); }}>

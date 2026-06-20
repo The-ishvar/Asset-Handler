@@ -148,15 +148,14 @@ export default function Profile() {
     { enabled: !!user?.id }
   );
   const { data: profile } = useGetUserProfile(user?.id, { enabled: !!user?.id });
-  const { data: providerData } = useProviderDashboard({ enabled: !!user, retry: false });
+  const isProvider = user?.role === "provider" || user?.role === "admin" || user?.role === "super_admin";
+  const { data: providerData } = useProviderDashboard({ enabled: isProvider, retry: false });
 
   const updateUser = useUpdateUser();
   const patchProfile = usePatchMyProfile();
 
-  if (!user) {
-    setLocation("/login");
-    return null;
-  }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -176,7 +175,7 @@ export default function Profile() {
             }
           );
         },
-        onError: () => toast({ title: "Update failed", variant: "destructive" }),
+        onError: () => toast({ title: "Update nahi ho saka", variant: "destructive" }),
       }
     );
   };
@@ -320,7 +319,7 @@ export default function Profile() {
           ) : !myListings?.length ? (
             <div className="text-center py-12 bg-muted/20 rounded-xl border border-dashed">
               <Package className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
-              <p className="text-muted-foreground text-sm">No listings yet.</p>
+              <p className="text-muted-foreground text-sm">Abhi koi listing nahi hai.</p>
             </div>
           ) : (
             <div className="space-y-3">

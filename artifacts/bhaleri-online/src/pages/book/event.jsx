@@ -53,7 +53,7 @@ export default function BookEvent() {
   function handleSubmit(e) {
     e.preventDefault();
     if (!selectedEvent) {
-      toast({ title: "Please select an event", variant: "destructive" });
+      toast({ title: "Event select karein", variant: "destructive" });
       return;
     }
     createBooking.mutate({

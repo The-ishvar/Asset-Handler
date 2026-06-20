@@ -47,7 +47,7 @@ export default function BookBus() {
   function handleSubmit(e) {
     e.preventDefault();
     if (!selectedBus || !date) {
-      toast({ title: "Please select a bus and date", variant: "destructive" });
+      toast({ title: "Bus aur date select karein", variant: "destructive" });
       return;
     }
     createBooking.mutate({

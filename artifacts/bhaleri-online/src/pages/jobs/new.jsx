@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useCreateJob } from "@/lib/api";
@@ -23,7 +23,8 @@ export default function NewJob() {
   const [contactPhone, setContactPhone] = useState(user?.phone || "");
   const [description, setDescription] = useState("");
 
-  if (!user) { setLocation("/login"); return null; }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();

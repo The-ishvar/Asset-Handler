@@ -5,9 +5,15 @@ import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Heart, MessageCircle, Share2, Eye, Plus, Volume2, VolumeX, Send, X, Play, Pause } from "lucide-react";
+import { Heart, MessageCircle, Share2, Eye, Plus, Volume2, VolumeX, Send, X, Play } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+
+function getYouTubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
 
 function ReelCard({ reel, isActive }) {
   const { user } = useAuth();
@@ -27,124 +33,235 @@ function ReelCard({ reel, isActive }) {
   const { data: comments } = useListReelComments(reel.id, { enabled: showComments });
   const addComment = useAddReelComment();
 
+  const ytId = getYouTubeId(reel.videoUrl);
+
+  // Fix: handle play() Promise race condition properly
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || ytId) return;
+
+    let cancelled = false;
+
     if (isActive) {
-      video.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-      if (!viewRecordedRef.current) { recordView.mutate({ id: reel.id }); viewRecordedRef.current = true; }
+      const promise = video.play();
+      if (promise !== undefined) {
+        promise
+          .then(() => { if (!cancelled) setPlaying(true); })
+          .catch((err) => {
+            // AbortError is expected when pause() fires before play() resolves
+            if (err.name !== "AbortError" && err.name !== "NotAllowedError") {
+              console.warn("Video play error:", err.message);
+            }
+            if (!cancelled) setPlaying(false);
+          });
+      }
+      if (!viewRecordedRef.current) {
+        recordView.mutate({ id: reel.id });
+        viewRecordedRef.current = true;
+      }
     } else {
-      video.pause(); setPlaying(false);
+      video.pause();
+      if (!cancelled) setPlaying(false);
     }
-  }, [isActive, recordView, reel.id]);
+
+    return () => { cancelled = true; };
+  }, [isActive, ytId, reel.id]); // removed recordView from deps to avoid re-runs
 
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
-    if (playing) { video.pause(); setPlaying(false); } else { video.play(); setPlaying(true); }
+    if (playing) {
+      video.pause();
+      setPlaying(false);
+    } else {
+      const promise = video.play();
+      if (promise !== undefined) {
+        promise
+          .then(() => setPlaying(true))
+          .catch((err) => {
+            if (err.name !== "AbortError") console.warn(err);
+            setPlaying(false);
+          });
+      }
+    }
   };
 
   const handleLike = () => {
-    if (!user) { toast({ title: "Login to like reels", variant: "destructive" }); return; }
+    if (!user) { toast({ title: "Like karne ke liye login karein", variant: "destructive" }); return; }
+    const prev = liked;
+    const prevCount = likeCount;
     setLiked(!liked);
     setLikeCount((c) => liked ? c - 1 : c + 1);
     toggleLike.mutate({ id: reel.id }, {
       onSuccess: (d) => { setLiked(d.liked); setLikeCount(d.likeCount); },
-      onError: () => { setLiked(liked); setLikeCount(likeCount); },
+      onError: () => { setLiked(prev); setLikeCount(prevCount); },
     });
+  };
+
+  const handleShare = async () => {
+    const shareData = { title: reel.title, text: reel.description || reel.title, url: window.location.href };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast({ title: "Link copied!" });
+      }
+    } catch (e) {
+      // User cancelled share — no error needed
+    }
   };
 
   const handleComment = (e) => {
     e.preventDefault();
-    if (!user) { toast({ title: "Login to comment", variant: "destructive" }); return; }
+    if (!user) { toast({ title: "Comment karne ke liye login karein", variant: "destructive" }); return; }
     if (!commentText.trim()) return;
     addComment.mutate({ id: reel.id, data: { content: commentText } }, {
-      onSuccess: () => { setCommentText(""); qc.invalidateQueries({ queryKey: ["listReelComments", reel.id] }); },
+      onSuccess: () => {
+        setCommentText("");
+        qc.invalidateQueries({ queryKey: ["listReelComments", reel.id] });
+      },
     });
   };
 
-  const isYouTube = reel.videoUrl.includes("youtube.com") || reel.videoUrl.includes("youtu.be");
-
   return (
     <div className="relative w-full h-full bg-black flex items-center justify-center select-none">
-      {isYouTube ? (
+      {ytId ? (
         <iframe
-          src={reel.videoUrl.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/") + "?autoplay=1&mute=1&loop=1"}
-          className="w-full h-full object-contain"
-          allow="autoplay"
+          src={`https://www.youtube.com/embed/${ytId}?autoplay=${isActive ? 1 : 0}&mute=1&loop=1&playlist=${ytId}&controls=0&playsinline=1&rel=0&modestbranding=1`}
+          className="w-full h-full"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
           title={reel.title}
+          style={{ border: "none" }}
         />
       ) : (
-        <video ref={videoRef} src={reel.videoUrl} className="w-full h-full object-contain" loop muted={muted} playsInline poster={reel.thumbnailUrl || undefined} onClick={togglePlay} />
+        <video
+          ref={videoRef}
+          src={reel.videoUrl}
+          className="w-full h-full object-contain"
+          loop
+          muted={muted}
+          playsInline
+          preload="metadata"
+          poster={reel.thumbnailUrl || undefined}
+          onClick={togglePlay}
+          onError={() => setPlaying(false)}
+        />
       )}
-      {!isYouTube && !playing && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="bg-black/40 rounded-full p-5"><Play className="w-10 h-10 text-white fill-white" /></div>
-        </div>
+
+      {/* Play icon overlay for non-YouTube when paused */}
+      {!ytId && !playing && (
+        <button
+          className="absolute inset-0 flex items-center justify-center"
+          onClick={togglePlay}
+          aria-label="Play"
+        >
+          <div className="bg-black/40 backdrop-blur-sm rounded-full p-5">
+            <Play className="w-10 h-10 text-white fill-white" />
+          </div>
+        </button>
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none" />
+
+      {/* Bottom info */}
       <div className="absolute bottom-20 left-4 right-16 text-white pointer-events-none">
         <div className="flex items-center gap-2 mb-2">
-          <Avatar className="w-8 h-8 border border-white/40">
+          <Avatar className="w-8 h-8 border-2 border-white/60">
             <AvatarImage src={reel.userAvatarUrl || ""} />
             <AvatarFallback className="text-xs bg-white/20 text-white">{(reel.userName || "?").charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
-          <span className="font-semibold text-sm">{reel.userName || "User"}</span>
+          <span className="font-semibold text-sm drop-shadow">{reel.userName || "User"}</span>
         </div>
-        <h3 className="font-bold text-base leading-tight mb-1">{reel.title}</h3>
+        <h3 className="font-bold text-base leading-tight mb-1 drop-shadow">{reel.title}</h3>
         {reel.description && <p className="text-white/80 text-sm line-clamp-2">{reel.description}</p>}
       </div>
+
+      {/* Right action buttons */}
       <div className="absolute right-3 bottom-24 flex flex-col items-center gap-5">
         <button onClick={handleLike} className="flex flex-col items-center gap-1 text-white">
-          <div className={`p-2 rounded-full transition-colors ${liked ? "bg-red-500" : "bg-black/30"}`}><Heart className={`w-6 h-6 ${liked ? "fill-white" : ""}`} /></div>
-          <span className="text-xs font-medium">{likeCount}</span>
+          <div className={`p-2.5 rounded-full transition-all active:scale-90 ${liked ? "bg-red-500 scale-110" : "bg-black/40 backdrop-blur-sm"}`}>
+            <Heart className={`w-6 h-6 transition-all ${liked ? "fill-white text-white" : ""}`} />
+          </div>
+          <span className="text-xs font-bold drop-shadow">{likeCount}</span>
         </button>
+
         <button onClick={() => setShowComments(true)} className="flex flex-col items-center gap-1 text-white">
-          <div className="p-2 rounded-full bg-black/30"><MessageCircle className="w-6 h-6" /></div>
-          <span className="text-xs font-medium">{reel.commentCount}</span>
+          <div className="p-2.5 rounded-full bg-black/40 backdrop-blur-sm active:scale-90">
+            <MessageCircle className="w-6 h-6" />
+          </div>
+          <span className="text-xs font-bold drop-shadow">{reel.commentCount}</span>
         </button>
-        <button onClick={() => navigator.share?.({ title: reel.title, url: window.location.href }).catch(() => {})} className="flex flex-col items-center gap-1 text-white">
-          <div className="p-2 rounded-full bg-black/30"><Share2 className="w-6 h-6" /></div>
-          <span className="text-xs font-medium">Share</span>
+
+        <button onClick={handleShare} className="flex flex-col items-center gap-1 text-white">
+          <div className="p-2.5 rounded-full bg-black/40 backdrop-blur-sm active:scale-90">
+            <Share2 className="w-6 h-6" />
+          </div>
+          <span className="text-xs font-bold drop-shadow">Share</span>
         </button>
-        <div className="flex flex-col items-center gap-1 text-white">
-          <div className="p-2 rounded-full bg-black/30"><Eye className="w-6 h-6" /></div>
-          <span className="text-xs font-medium">{reel.viewCount}</span>
+
+        <div className="flex flex-col items-center gap-1 text-white pointer-events-none">
+          <div className="p-2.5 rounded-full bg-black/40 backdrop-blur-sm">
+            <Eye className="w-6 h-6" />
+          </div>
+          <span className="text-xs font-bold drop-shadow">{reel.viewCount}</span>
         </div>
-        {!isYouTube && (
+
+        {!ytId && (
           <button onClick={() => setMuted(!muted)} className="text-white">
-            <div className="p-2 rounded-full bg-black/30">{muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}</div>
+            <div className="p-2.5 rounded-full bg-black/40 backdrop-blur-sm active:scale-90">
+              {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            </div>
           </button>
         )}
       </div>
+
+      {/* Comments drawer */}
       {showComments && (
-        <div className="absolute inset-x-0 bottom-0 bg-background rounded-t-2xl flex flex-col max-h-[70%] z-20">
+        <div className="absolute inset-x-0 bottom-0 bg-background rounded-t-2xl flex flex-col max-h-[70%] z-20 shadow-2xl">
           <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
             <h4 className="font-semibold">Comments</h4>
-            <button onClick={() => setShowComments(false)}><X className="w-5 h-5" /></button>
+            <button onClick={() => setShowComments(false)} className="p-1 rounded-full hover:bg-muted">
+              <X className="w-5 h-5" />
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {!comments?.length ? (
-              <p className="text-center text-muted-foreground text-sm py-4">No comments yet. Be first!</p>
+              <div className="text-center py-8">
+                <MessageCircle className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-muted-foreground text-sm">No comments yet. Pehla comment karein!</p>
+              </div>
             ) : (
               comments.map((c) => (
                 <div key={c.id} className="flex gap-3">
-                  <Avatar className="w-7 h-7 shrink-0">
+                  <Avatar className="w-8 h-8 shrink-0">
                     <AvatarImage src={c.userAvatarUrl || ""} />
-                    <AvatarFallback className="text-xs">{(c.userName || "?").charAt(0)}</AvatarFallback>
+                    <AvatarFallback className="text-xs bg-primary/10">{(c.userName || "?").charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <div>
-                    <span className="font-semibold text-xs">{c.userName || "User"} </span>
+                  <div className="flex-1">
+                    <span className="font-semibold text-xs text-primary">{c.userName || "User"} </span>
                     <span className="text-sm">{c.content}</span>
-                    <div className="text-xs text-muted-foreground mt-0.5">{new Date(c.createdAt).toLocaleDateString()}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {new Date(c.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                    </div>
                   </div>
                 </div>
               ))
             )}
           </div>
-          <form onSubmit={handleComment} className="p-3 border-t flex gap-2 shrink-0">
-            <Input value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Add a comment..." className="flex-1" />
-            <Button type="submit" size="icon" disabled={addComment.isPending}><Send className="w-4 h-4" /></Button>
+          <form onSubmit={handleComment} className="p-3 border-t flex gap-2 shrink-0 bg-background">
+            <Input
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder={user ? "Comment likhein..." : "Comment ke liye login karein"}
+              className="flex-1 bg-muted/40 border-0 focus-visible:ring-1"
+              disabled={!user}
+            />
+            <Button type="submit" size="icon" disabled={addComment.isPending || !commentText.trim()}>
+              <Send className="w-4 h-4" />
+            </Button>
           </form>
         </div>
       )}
@@ -170,7 +287,7 @@ export default function Reels() {
       <div className="flex items-center justify-center h-[80vh]">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-muted-foreground">Loading reels...</p>
+          <p className="text-muted-foreground text-sm">Reels load ho rahe hain...</p>
         </div>
       </div>
     );
@@ -178,11 +295,17 @@ export default function Reels() {
 
   if (!reels?.length) {
     return (
-      <div className="flex flex-col items-center justify-center h-[80vh] text-center space-y-4">
-        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center"><Play className="w-10 h-10 text-muted-foreground" /></div>
-        <h2 className="text-xl font-bold">No Reels Yet</h2>
-        <p className="text-muted-foreground max-w-xs">Be the first to share a short video with the Bhaleri community!</p>
-        {user && <Link href="/reels/new"><Button><Plus className="w-4 h-4 mr-2" /> Create Reel</Button></Link>}
+      <div className="flex flex-col items-center justify-center h-[80vh] text-center space-y-4 px-6">
+        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
+          <Play className="w-10 h-10 text-muted-foreground" />
+        </div>
+        <h2 className="text-xl font-bold">Abhi Koi Reel Nahi</h2>
+        <p className="text-muted-foreground max-w-xs text-sm">Bhaleri community ke saath pehla short video share karein!</p>
+        {user && (
+          <Link href="/reels/new">
+            <Button className="gap-2"><Plus className="w-4 h-4" /> Reel Banayein</Button>
+          </Link>
+        )}
       </div>
     );
   }
@@ -191,20 +314,30 @@ export default function Reels() {
     <div className="relative -mx-4 -my-6 md:-my-8">
       {user && (
         <Link href="/reels/new">
-          <button className="absolute top-4 right-4 z-30 bg-primary text-primary-foreground rounded-full p-3 shadow-lg"><Plus className="w-5 h-5" /></button>
+          <button className="absolute top-4 right-4 z-30 bg-primary text-primary-foreground rounded-full p-3 shadow-xl active:scale-95 transition-transform">
+            <Plus className="w-5 h-5" />
+          </button>
         </Link>
       )}
-      <div className="absolute top-4 left-4 z-30 text-white font-bold text-lg drop-shadow">🎬 Reels</div>
-      <div ref={containerRef} onScroll={handleScroll} className="overflow-y-scroll" style={{ height: "calc(100vh - 56px - 64px)", scrollSnapType: "y mandatory", scrollbarWidth: "none" }}>
+      <div className="absolute top-4 left-4 z-30 text-white font-bold text-lg drop-shadow-lg">🎬 Reels</div>
+
+      <div
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="overflow-y-scroll"
+        style={{ height: "calc(100vh - 56px - 64px)", scrollSnapType: "y mandatory", scrollbarWidth: "none" }}
+      >
         {reels.map((reel, i) => (
           <div key={reel.id} style={{ scrollSnapAlign: "start", height: "calc(100vh - 56px - 64px)" }}>
             <ReelCard reel={reel} isActive={i === activeIndex} />
           </div>
         ))}
       </div>
-      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex flex-col gap-1 z-20">
+
+      {/* Scroll progress dots */}
+      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex flex-col gap-1 z-20 pointer-events-none">
         {reels.map((_, i) => (
-          <div key={i} className={`rounded-full transition-all ${i === activeIndex ? "w-2 h-4 bg-white" : "w-1.5 h-1.5 bg-white/40"}`} />
+          <div key={i} className={`rounded-full transition-all duration-200 ${i === activeIndex ? "w-2 h-4 bg-white" : "w-1.5 h-1.5 bg-white/40"}`} />
         ))}
       </div>
     </div>

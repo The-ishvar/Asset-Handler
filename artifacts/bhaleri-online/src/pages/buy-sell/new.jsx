@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useCreateListing } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -30,15 +30,16 @@ export default function NewListing() {
   const [deliveryAvailable, setDeliveryAvailable] = useState(false);
   const [photos, setPhotos] = useState([]);
 
-  if (!user) { setLocation("/login"); return null; }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title || !price || !contactInfo) {
-      toast({ title: "Please fill all required fields", variant: "destructive" }); return;
+      toast({ title: "Sabhi zaroori fields bharo", variant: "destructive" }); return;
     }
     if (discountPrice && Number(discountPrice) <= Number(price)) {
-      toast({ title: "Original price must be higher than selling price", variant: "destructive" }); return;
+      toast({ title: "Original price selling price se zyada honi chahiye", variant: "destructive" }); return;
     }
 
     const photoUrl = photos.length === 0 ? null
@@ -63,7 +64,7 @@ export default function NewListing() {
           toast({ title: "Listing posted!", description: "Your product is now live on the marketplace." });
           setLocation("/buy-sell");
         },
-        onError: (err) => toast({ title: "Failed to post listing", description: err.message, variant: "destructive" }),
+        onError: (err) => toast({ title: "Listing post nahi ho saki", description: err.message, variant: "destructive" }),
       }
     );
   };

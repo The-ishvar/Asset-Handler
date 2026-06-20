@@ -22,13 +22,13 @@ export default function AdminNotices() {
     e.preventDefault();
     createNotice.mutate(form, {
       onSuccess: () => { toast({ title: "Notice published" }); setForm({ title: "", content: "", issuedBy: "" }); setShowForm(false); refetch(); },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
   const handleDelete = (id) => {
     if (!confirm("Delete this notice?")) return;
-    deleteNotice.mutate({ id }, { onSuccess: () => { toast({ title: "Deleted" }); refetch(); }, onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }) });
+    deleteNotice.mutate({ id }, { onSuccess: () => { toast({ title: "Delete ho gaya" }); refetch(); }, onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }) });
   };
 
   return (

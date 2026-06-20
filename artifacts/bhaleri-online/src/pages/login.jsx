@@ -37,7 +37,7 @@ export default function Login() {
       {
         onSuccess: (data) => {
           login(data.token, data.user);
-          toast({ title: "Welcome back!", description: `Hello, ${data.user.name}!` });
+          toast({ title: "Swagat hai! 🎉", description: `Hello, ${data.user.name}!` });
           setLocation("/");
         },
         onError: (err) => {

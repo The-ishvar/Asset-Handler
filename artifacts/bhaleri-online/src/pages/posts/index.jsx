@@ -31,7 +31,7 @@ function PostCard({ post, currentUser }) {
   const { data: comments } = useGetPostComments(post.id, { enabled: showComments });
 
   const handleLike = () => {
-    if (!currentUser) { toast({ title: "Login to like posts", variant: "destructive" }); return; }
+    if (!currentUser) { toast({ title: "Like karne ke liye login karein", variant: "destructive" }); return; }
     setOptimisticLiked(!optimisticLiked);
     setOptimisticCount((c) => optimisticLiked ? c - 1 : c + 1);
     likePost.mutate(post.id);
@@ -47,10 +47,10 @@ function PostCard({ post, currentUser }) {
   const handleComment = (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
-    if (!currentUser) { toast({ title: "Login to comment", variant: "destructive" }); return; }
+    if (!currentUser) { toast({ title: "Comment karne ke liye login karein", variant: "destructive" }); return; }
     addComment.mutate({ id: post.id, content: commentText }, {
       onSuccess: () => setCommentText(""),
-      onError: (err) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
@@ -201,20 +201,19 @@ function CreatePostBox({ user }) {
   const [mediaUrls, setMediaUrls] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const fileInputRef = useState(null);
 
   const { uploadFile } = useUpload({
     onSuccess: (result) => {
       setMediaUrls((prev) => [...prev, result.objectUrl]);
       setUploading(false);
     },
-    onError: () => { setUploading(false); toast({ title: "Upload failed", variant: "destructive" }); },
+    onError: () => { setUploading(false); toast({ title: "Upload fail ho gaya", variant: "destructive" }); },
   });
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    if (mediaUrls.length + files.length > 4) { toast({ title: "Maximum 4 media files", variant: "destructive" }); return; }
+    if (mediaUrls.length + files.length > 4) { toast({ title: "Maximum 4 media files allowed hain", variant: "destructive" }); return; }
     setUploading(true);
     for (const file of files) {
       await uploadFile(file);
@@ -229,7 +228,7 @@ function CreatePostBox({ user }) {
         setContent(""); setTags(""); setMediaUrls([]); setExpanded(false);
         toast({ title: "Post share ho gaya!" });
       },
-      onError: (err) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 

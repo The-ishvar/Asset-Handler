@@ -29,7 +29,7 @@ export default function AdminListings() {
     if (!confirm("Delete this listing?")) return;
     deleteListing.mutate({ id }, {
       onSuccess: () => { toast({ title: "Listing deleted" }); refetch(); },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 

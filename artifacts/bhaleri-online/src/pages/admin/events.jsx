@@ -22,13 +22,13 @@ export default function AdminEvents() {
     e.preventDefault();
     createEvent.mutate(form, {
       onSuccess: () => { toast({ title: "Event added" }); setForm({ title: "", date: "", time: "", location: "", description: "" }); setShowForm(false); refetch(); },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
   const handleDelete = (id) => {
     if (!confirm("Delete this event?")) return;
-    deleteEvent.mutate({ id }, { onSuccess: () => { toast({ title: "Deleted" }); refetch(); }, onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }) });
+    deleteEvent.mutate({ id }, { onSuccess: () => { toast({ title: "Delete ho gaya" }); refetch(); }, onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }) });
   };
 
   return (

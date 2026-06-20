@@ -52,7 +52,7 @@ export default function BookAuto() {
   function handleSubmit(e) {
     e.preventDefault();
     if (!pickup || !destination || !date || !time) {
-      toast({ title: "Please fill all required fields", variant: "destructive" });
+      toast({ title: "Sabhi zaroori fields bharo", variant: "destructive" });
       return;
     }
     createBooking.mutate({

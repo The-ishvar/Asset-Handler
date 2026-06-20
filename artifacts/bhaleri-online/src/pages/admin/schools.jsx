@@ -30,15 +30,15 @@ export default function AdminSchools() {
         setName(""); setType(""); setAddress(""); setPhone(""); setTiming(""); setDescription("");
         setShowForm(false); refetch();
       },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
   const handleDelete = (id, name) => {
     if (!confirm(`Delete "${name}"?`)) return;
     deleteSchool.mutate({ id }, {
-      onSuccess: () => { toast({ title: "Deleted" }); refetch(); },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onSuccess: () => { toast({ title: "Delete ho gaya" }); refetch(); },
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 

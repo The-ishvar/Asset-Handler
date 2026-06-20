@@ -10,7 +10,7 @@ export default function MedicalDetail() {
   const { data: item, isLoading, error } = useGetMedical(Number(params?.id), { enabled: !!params?.id });
 
   if (isLoading) return <div className="max-w-2xl mx-auto space-y-4"><Skeleton className="h-10 w-2/3" /><Skeleton className="h-48 w-full" /></div>;
-  if (error || !item) return <div className="text-center py-10 text-destructive">Not found.</div>;
+  if (error || !item) return <div className="text-center py-10 text-destructive">Nahi mila.</div>;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

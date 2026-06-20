@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useLocation, Link } from "wouter";
 import { useGetCart, useRemoveFromCart, useUpdateCartQuantity } from "@/lib/api";
@@ -25,7 +25,8 @@ export default function CartPage() {
   const updateQty = useUpdateCartQuantity();
   const [removingId, setRemovingId] = useState(null);
 
-  if (!user) { setLocation("/login"); return null; }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
   const handleRemove = (listingId) => {
     setRemovingId(listingId);

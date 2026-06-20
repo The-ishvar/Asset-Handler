@@ -43,7 +43,7 @@ export default function BookMedical() {
   function handleSubmit(e) {
     e.preventDefault();
     if (!selectedClinic || !date || !timeSlot) {
-      toast({ title: "Please select clinic, date and time", variant: "destructive" });
+      toast({ title: "Clinic, date aur time select karein", variant: "destructive" });
       return;
     }
     createBooking.mutate({

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useLocation, Link } from "wouter";
 import { useGetCart, useCreateOrder, useRemoveFromCart } from "@/lib/api";
@@ -36,7 +36,8 @@ export default function CheckoutPage() {
   const [success, setSuccess] = useState(false);
   const [orderId, setOrderId] = useState(null);
 
-  if (!user) { setLocation("/login"); return null; }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
   const subtotal = cartItems.reduce((sum, i) => sum + (i.listing?.price || 0) * (i.quantity || 1), 0);
   const total = subtotal;
@@ -44,7 +45,7 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (!name || !phone || !address) {
-      toast({ title: "Please fill delivery details", variant: "destructive" }); return;
+      toast({ title: "Delivery details fill karein", variant: "destructive" }); return;
     }
     if (cartItems.length === 0) {
       toast({ title: "Your cart is empty", variant: "destructive" }); return;

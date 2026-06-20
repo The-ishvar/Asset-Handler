@@ -117,7 +117,7 @@ export default function StoriesSlider() {
             <div className="w-14 h-14 rounded-full bg-muted/60 border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
               <Plus className="w-6 h-6 text-muted-foreground/50" />
             </div>
-            <span className="text-[10px] text-muted-foreground">Login to add</span>
+            <span className="text-[10px] text-muted-foreground">Login karein</span>
           </div>
         )}
 

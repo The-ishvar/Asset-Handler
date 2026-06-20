@@ -21,13 +21,13 @@ export default function AdminEmergency() {
     e.preventDefault();
     createEmergency.mutate(form, {
       onSuccess: () => { toast({ title: "Emergency contact added" }); setForm({ name: "", phone: "", description: "" }); setShowForm(false); refetch(); },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
   const handleDelete = (id) => {
     if (!confirm("Delete this contact?")) return;
-    deleteEmergency.mutate({ id }, { onSuccess: () => { toast({ title: "Deleted" }); refetch(); }, onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }) });
+    deleteEmergency.mutate({ id }, { onSuccess: () => { toast({ title: "Delete ho gaya" }); refetch(); }, onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }) });
   };
 
   return (

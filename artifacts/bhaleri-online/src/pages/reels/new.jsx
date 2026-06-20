@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { useCreateReel } from "@/lib/api";
@@ -31,11 +31,12 @@ export default function NewReel() {
       toast({ title: "Video upload ho gaya!" });
     },
     onError: (err) => {
-      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+      toast({ title: "Upload fail ho gaya", description: err.message, variant: "destructive" });
     },
   });
 
-  if (!user) { setLocation("/login"); return null; }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];

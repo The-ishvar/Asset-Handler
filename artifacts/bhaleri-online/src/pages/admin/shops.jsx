@@ -20,13 +20,13 @@ export default function AdminShops() {
     e.preventDefault();
     createShop.mutate(form, {
       onSuccess: () => { toast({ title: "Shop added" }); setForm({ name: "", type: "", address: "", phone: "", timing: "", description: "" }); setShowForm(false); refetch(); },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
   const handleDelete = (id, name) => {
     if (!confirm(`Delete "${name}"?`)) return;
-    deleteShop.mutate({ id }, { onSuccess: () => { toast({ title: "Deleted" }); refetch(); }, onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }) });
+    deleteShop.mutate({ id }, { onSuccess: () => { toast({ title: "Delete ho gaya" }); refetch(); }, onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }) });
   };
 
   return (

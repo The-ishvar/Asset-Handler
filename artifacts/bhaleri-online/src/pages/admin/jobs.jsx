@@ -22,13 +22,13 @@ export default function AdminJobs() {
     e.preventDefault();
     createJob.mutate(form, {
       onSuccess: () => { toast({ title: "Job posted" }); setForm({ title: "", company: "", type: "", location: "", salary: "", contactPhone: "", description: "" }); setShowForm(false); refetch(); },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
   const handleDelete = (id) => {
     if (!confirm("Delete this job?")) return;
-    deleteJob.mutate({ id }, { onSuccess: () => { toast({ title: "Deleted" }); refetch(); }, onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }) });
+    deleteJob.mutate({ id }, { onSuccess: () => { toast({ title: "Delete ho gaya" }); refetch(); }, onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }) });
   };
 
   return (

@@ -34,7 +34,7 @@ export default function PublicProfile() {
   }, [profile]);
 
   const handleFollow = () => {
-    if (!user) { toast({ title: "Login to follow users", variant: "destructive" }); return; }
+    if (!user) { toast({ title: "Follow karne ke liye login karein", variant: "destructive" }); return; }
     const prev = isFollowing;
     setIsFollowing(!prev);
     setFollowerCount((c) => prev ? c - 1 : c + 1);
@@ -127,7 +127,7 @@ export default function PublicProfile() {
 
         <TabsContent value="listings" className="p-4 mt-0">
           {!listings?.length ? (
-            <div className="text-center py-12 text-muted-foreground text-sm">No listings.</div>
+            <div className="text-center py-12 text-muted-foreground text-sm">Koi listing nahi.</div>
           ) : (
             <div className="space-y-3">
               {listings.filter((l) => l.status === "approved").map((l) => (

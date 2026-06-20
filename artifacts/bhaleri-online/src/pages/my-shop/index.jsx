@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useLocation, Link } from "wouter";
 import { useGetMyShop, useCreateMyShop, useUpdateMyShop, useAddShopItem, useDeleteShopItem } from "@/lib/api";
@@ -43,13 +43,14 @@ export default function MyShopPage() {
   const [itemPhotos, setItemPhotos] = useState([""]);
   const [showAddItem, setShowAddItem] = useState(false);
 
-  if (!user) { setLocation("/login"); return null; }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
   const handleCreateShop = (e) => {
     e.preventDefault();
     createShop.mutate({ name: shopName, description: shopDesc }, {
       onSuccess: () => { toast({ title: "Shop created!" }); qc.invalidateQueries({ queryKey: ["myShop"] }); },
-      onError: (err) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
@@ -57,7 +58,7 @@ export default function MyShopPage() {
     e.preventDefault();
     updateShop.mutate({ name: shopName || shop.name, description: shopDesc || shop.description }, {
       onSuccess: () => { toast({ title: "Shop updated!" }); setEditingShop(false); qc.invalidateQueries({ queryKey: ["myShop"] }); },
-      onError: (err) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
@@ -72,13 +73,13 @@ export default function MyShopPage() {
         setShowAddItem(false);
         qc.invalidateQueries({ queryKey: ["myShop"] });
       },
-      onError: (err) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
   const handleDeleteItem = (itemId) => {
     deleteItem.mutate(itemId, {
-      onSuccess: () => { toast({ title: "Item removed" }); qc.invalidateQueries({ queryKey: ["myShop"] }); },
+      onSuccess: () => { toast({ title: "Item remove ho gaya" }); qc.invalidateQueries({ queryKey: ["myShop"] }); },
     });
   };
 

@@ -33,8 +33,8 @@ export default function JobDetail() {
 
   const handleApply = (e) => {
     e.preventDefault();
-    if (!name || !phone) { toast({ title: "Name and phone are required", variant: "destructive" }); return; }
-    if (!user) { toast({ title: "Please login to apply", variant: "destructive" }); return; }
+    if (!name || !phone) { toast({ title: "Naam aur phone number dono chahiye", variant: "destructive" }); return; }
+    if (!user) { toast({ title: "Apply karne ke liye login karein", variant: "destructive" }); return; }
     applyToJob.mutate(
       { id, data: { applicantName: name, applicantPhone: phone, message: message || undefined } },
       {
@@ -43,7 +43,7 @@ export default function JobDetail() {
           setShowApply(false);
           refetchApplied();
         },
-        onError: (err) => toast({ title: "Failed to apply", description: err.message, variant: "destructive" }),
+        onError: (err) => toast({ title: "Apply nahi ho saka", description: err.message, variant: "destructive" }),
       }
     );
   };
@@ -151,7 +151,7 @@ export default function JobDetail() {
               {!user ? (
                 <Link href="/login">
                   <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
-                    <Send className="w-4 h-4 mr-2" /> Login to Apply
+                    <Send className="w-4 h-4 mr-2" /> Apply karne ke liye login karein
                   </Button>
                 </Link>
               ) : !applied ? (

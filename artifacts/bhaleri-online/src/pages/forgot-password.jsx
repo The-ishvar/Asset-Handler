@@ -47,7 +47,7 @@ export default function ForgotPassword() {
         setStep(STEPS.OTP);
         toast({ title: "OTP bheja gaya!", description: "Aapke phone par OTP aaya hai" });
       },
-      onError: (err) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   }
 
@@ -67,7 +67,7 @@ export default function ForgotPassword() {
         setOtp("");
         toast({ title: "OTP dobara bheja gaya!" });
       },
-      onError: (err) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   }
 

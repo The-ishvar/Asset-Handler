@@ -121,7 +121,8 @@ export default function Conversation() {
     }, 2000);
   }, [user, otherId]);
 
-  if (!user) { setLocation("/login"); return null; }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
   const handleSend = (e) => {
     e?.preventDefault();

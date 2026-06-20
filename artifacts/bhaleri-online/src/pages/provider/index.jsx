@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { useProviderDashboard, useProviderEarnings, useUpdateBookingStatus } from "@/lib/api";
 import { useLocation } from "wouter";
@@ -128,7 +128,8 @@ export default function ProviderDashboard() {
   const updateStatus = useUpdateBookingStatus();
   const [loadingId, setLoadingId] = useState(null);
 
-  if (!user) { setLocation("/login"); return null; }
+  useEffect(() => { if (!user) setLocation("/login"); }, [user]);
+  if (!user) return null;
 
   function handleStatusChange(id, status) {
     setLoadingId(id);

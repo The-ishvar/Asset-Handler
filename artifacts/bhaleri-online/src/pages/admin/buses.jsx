@@ -20,13 +20,13 @@ export default function AdminBuses() {
     e.preventDefault();
     createBus.mutate(form, {
       onSuccess: () => { toast({ title: "Bus route added" }); setForm({ route: "", from: "", to: "", timing: "", description: "" }); setShowForm(false); refetch(); },
-      onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }),
     });
   };
 
   const handleDelete = (id) => {
     if (!confirm("Delete this bus route?")) return;
-    deleteBus.mutate({ id }, { onSuccess: () => { toast({ title: "Deleted" }); refetch(); }, onError: (err) => toast({ title: "Failed", description: err.message, variant: "destructive" }) });
+    deleteBus.mutate({ id }, { onSuccess: () => { toast({ title: "Delete ho gaya" }); refetch(); }, onError: (err) => toast({ title: "Kuch gadbad ho gayi", description: err.message, variant: "destructive" }) });
   };
 
   return (
