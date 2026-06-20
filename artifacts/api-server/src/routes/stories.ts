@@ -33,7 +33,7 @@ router.get("/", optionalAuth, async (req, res) => {
 
 router.post("/", requireAuth, async (req, res) => {
   try {
-    const { mediaUrl, mediaType, caption } = req.body;
+    const { mediaUrl, mediaType, caption, title, musicUrl } = req.body;
     if (!mediaUrl) {
       res.status(400).json({ error: "mediaUrl is required" });
       return;
@@ -54,6 +54,8 @@ router.post("/", requireAuth, async (req, res) => {
         mediaUrl,
         mediaType: mediaType || "image",
         caption: caption || null,
+        title: title || null,
+        musicUrl: musicUrl || null,
         viewCount: 0,
         expiresAt: nowPlusSix(),
       })

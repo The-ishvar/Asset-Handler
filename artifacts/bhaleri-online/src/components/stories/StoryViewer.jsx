@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Trash2, Eye } from "lucide-react";
+import { X, Trash2, Eye, Music } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useDeleteStory, useRecordStoryView } from "@/lib/api";
 import { formatDistanceToNow } from "date-fns";
@@ -11,9 +11,10 @@ export default function StoryViewer({ stories, startIndex = 0, onClose }) {
   const [progress, setProgress] = useState(0);
   const timerRef = useRef(null);
   const progressRef = useRef(null);
+  const audioRef = useRef(null);
   const deleteStory = useDeleteStory();
   const recordView = useRecordStoryView();
-  const DURATION = 5000;
+  const DURATION = 7000;
 
   const story = stories[current];
 
@@ -26,6 +27,15 @@ export default function StoryViewer({ stories, startIndex = 0, onClose }) {
     setProgress(0);
     clearInterval(progressRef.current);
     clearTimeout(timerRef.current);
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+
+    if (story?.musicUrl) {
+      const audio = new Audio(story.musicUrl);
+      audio.volume = 0.6;
+      audio.loop = true;
+      audio.play().catch(() => {});
+      audioRef.current = audio;
+    }
 
     const startTime = Date.now();
     progressRef.current = setInterval(() => {
@@ -44,6 +54,7 @@ export default function StoryViewer({ stories, startIndex = 0, onClose }) {
     return () => {
       clearInterval(progressRef.current);
       clearTimeout(timerRef.current);
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     };
   }, [current, stories.length]);
 
@@ -106,6 +117,11 @@ export default function StoryViewer({ stories, startIndex = 0, onClose }) {
             <div className="text-white text-sm font-semibold truncate">{story.userName || "User"}</div>
             <div className="text-white/70 text-xs">{timeAgo}</div>
           </div>
+          {story.musicUrl && (
+            <div className="flex items-center gap-1 text-white/70 text-xs mr-1">
+              <Music className="w-3 h-3 animate-pulse" />
+            </div>
+          )}
           <div className="flex items-center gap-1 text-white/80 text-xs mr-2">
             <Eye className="w-3.5 h-3.5" />
             <span>{story.viewCount}</span>
@@ -145,9 +161,20 @@ export default function StoryViewer({ stories, startIndex = 0, onClose }) {
           )}
 
           {/* Caption */}
-          {story.caption && (
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
-              <p className="text-white text-sm text-center">{story.caption}</p>
+          {(story.title || story.caption || story.musicUrl) && (
+            <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
+              {story.title && (
+                <p className="text-white font-bold text-xl text-center drop-shadow mb-1 leading-tight">{story.title}</p>
+              )}
+              {story.caption && (
+                <p className="text-white/90 text-sm text-center">{story.caption}</p>
+              )}
+              {story.musicUrl && (
+                <div className="flex items-center justify-center gap-1.5 mt-2">
+                  <Music className="w-3.5 h-3.5 text-white/60 animate-pulse" />
+                  <span className="text-white/60 text-xs">🎵 Song chal raha hai</span>
+                </div>
+              )}
             </div>
           )}
         </div>

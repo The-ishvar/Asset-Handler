@@ -160,7 +160,7 @@ export default function ListingDetail() {
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">{listing.title}</h1>
           </div>
 
-          {user && !isOwnListing && (
+          {!isOwnListing && (
             <div className="flex gap-3">
               <Button
                 className="flex-1 bg-purple-600 hover:bg-purple-700"
@@ -179,14 +179,6 @@ export default function ListingDetail() {
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 {isInCart ? "View Cart" : addToCart.isPending ? "Adding..." : "Add to Cart"}
               </Button>
-            </div>
-          )}
-
-          {!user && (
-            <div className="flex gap-3">
-              <Link href="/login" className="flex-1">
-                <Button className="w-full bg-purple-600 hover:bg-purple-700"><Zap className="w-4 h-4 mr-2" /> Login to Buy</Button>
-              </Link>
             </div>
           )}
 

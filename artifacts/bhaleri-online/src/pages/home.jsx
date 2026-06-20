@@ -1,13 +1,15 @@
-import { Link } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import {
   School, Stethoscope, Store, Bus, ShoppingBag, Briefcase,
   Calendar, Bell, AlertTriangle, MapPin, Info, ArrowRight, Film,
   Users, MessageSquare, Camera, Search, UserSearch, Newspaper, Car, Ticket,
 } from "lucide-react";
-import { useListEvents, useListNotices, useListPosts } from "@/lib/api";
+import { useListEvents, useListNotices, useListPosts, useSearchUsers } from "@/lib/api";
 import AdsSection from "@/components/ads-section";
 import StoriesSlider from "@/components/stories/StoriesSlider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -32,9 +34,18 @@ const sections = [
 
 export default function Home() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
+  const [searchQ, setSearchQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const { data: events } = useListEvents();
   const { data: notices } = useListNotices();
   const { data: posts } = useListPosts();
+  const { data: searchResults, isLoading: searchLoading } = useSearchUsers(debouncedQ, { enabled: debouncedQ.length >= 2 });
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(searchQ), 350);
+    return () => clearTimeout(t);
+  }, [searchQ]);
 
   const upcomingEvents = events?.slice(0, 3) ?? [];
   const recentNotices = notices?.slice(0, 2) ?? [];
@@ -107,14 +118,54 @@ export default function Home() {
         </div>
       </section>
 
-      {/* User Search bar */}
-      <Link href="/search">
-        <div className="flex items-center gap-3 bg-muted/60 hover:bg-muted border rounded-2xl px-5 py-3.5 cursor-pointer transition-colors group">
-          <Search className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-          <span className="text-muted-foreground text-sm">Kisi bhi user ko dhoondein — naam ya phone se...</span>
-          <UserSearch className="w-4 h-4 text-muted-foreground ml-auto" />
+      {/* User Search */}
+      <div className="relative">
+        <div className="flex items-center gap-2 bg-muted/60 border rounded-2xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary/40 transition-all">
+          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+          <input
+            type="text"
+            placeholder="User naam se dhoondein…"
+            value={searchQ}
+            onChange={(e) => setSearchQ(e.target.value)}
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+          {searchQ && (
+            <button onClick={() => { setSearchQ(""); setDebouncedQ(""); }} className="text-muted-foreground hover:text-foreground text-xs px-1">✕</button>
+          )}
+          <UserSearch className="w-4 h-4 text-muted-foreground shrink-0" />
         </div>
-      </Link>
+
+        {debouncedQ.length >= 2 && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-2xl shadow-lg z-30 overflow-hidden max-h-72 overflow-y-auto">
+            {searchLoading ? (
+              <div className="p-4 text-sm text-muted-foreground text-center">Dhoond raha hai…</div>
+            ) : searchResults?.length === 0 ? (
+              <div className="p-4 text-sm text-muted-foreground text-center">"{debouncedQ}" naam ka koi user nahi mila</div>
+            ) : (
+              <div className="divide-y">
+                {searchResults?.map((person) => (
+                  <button
+                    key={person.id}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
+                    onClick={() => { setSearchQ(""); setDebouncedQ(""); setLocation(`/profile/${person.id}`); }}
+                  >
+                    <Avatar className="w-9 h-9 shrink-0">
+                      <AvatarImage src={person.avatarUrl || ""} />
+                      <AvatarFallback className="text-xs bg-primary/10 text-primary font-bold">
+                        {person.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">{person.name}</div>
+                      {person.section && <div className="text-xs text-muted-foreground truncate">{person.section}</div>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Recent Community Posts */}
       {recentPosts.length > 0 && (
