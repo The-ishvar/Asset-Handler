@@ -752,6 +752,7 @@ export function useViewSnap() {
     mutationFn: (id) => api.post(`/snaps/${id}/view`).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["snapInbox"] });
+      qc.invalidateQueries({ queryKey: ["snapSent"] });
     },
   });
 }

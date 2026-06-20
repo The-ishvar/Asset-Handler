@@ -56,7 +56,7 @@ router.post("/snaps/bulk", requireAuth, async (req: any, res) => {
   }
 });
 
-// Get my received snaps
+// Get my received snaps (excludes snaps already deleted from inbox after viewing)
 router.get("/snaps/inbox", requireAuth, async (req: any, res) => {
   try {
     const snaps = await db.select({
@@ -70,7 +70,7 @@ router.get("/snaps/inbox", requireAuth, async (req: any, res) => {
       senderAvatar: usersTable.avatarUrl,
     }).from(snapsTable)
       .leftJoin(usersTable, eq(snapsTable.senderId, usersTable.id))
-      .where(eq(snapsTable.receiverId, req.user.id))
+      .where(and(eq(snapsTable.receiverId, req.user.id), eq(snapsTable.deletedFromInbox, false)))
       .orderBy(desc(snapsTable.createdAt));
     res.json(snaps);
   } catch (err: any) {
@@ -86,6 +86,7 @@ router.get("/snaps/sent", requireAuth, async (req: any, res) => {
       mediaUrl: snapsTable.mediaUrl,
       caption: snapsTable.caption,
       viewed: snapsTable.viewed,
+      deletedFromInbox: snapsTable.deletedFromInbox,
       createdAt: snapsTable.createdAt,
       receiverId: snapsTable.receiverId,
       receiverName: usersTable.name,
@@ -100,11 +101,12 @@ router.get("/snaps/sent", requireAuth, async (req: any, res) => {
   }
 });
 
-// Mark snap as viewed
+// Mark snap as viewed and remove it from receiver's inbox (Snapchat-style)
 router.post("/snaps/:id/view", requireAuth, async (req: any, res) => {
   try {
     const id = Number(req.params.id);
-    await db.update(snapsTable).set({ viewed: true, viewedAt: new Date() })
+    await db.update(snapsTable)
+      .set({ viewed: true, viewedAt: new Date(), deletedFromInbox: true })
       .where(and(eq(snapsTable.id, id), eq(snapsTable.receiverId, req.user.id)));
     res.json({ ok: true });
   } catch (err: any) {

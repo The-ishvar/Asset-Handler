@@ -8,6 +8,7 @@ export const snapsTable = pgTable("snaps", {
   caption: text("caption"),
   viewed: boolean("viewed").default(false).notNull(),
   viewedAt: timestamp("viewed_at"),
+  deletedFromInbox: boolean("deleted_from_inbox").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

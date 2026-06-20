@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import {
   Camera, Send, Eye, EyeOff, X, Inbox, CheckCheck,
-  Square, Circle, Check, Video, Loader2, Search, Users
+  Square, Circle, Check, Video, Loader2, Search, Users, Trash2
 } from "lucide-react";
 
 // ─── Snap item in list ─────────────────────────────────────────────────────────
@@ -73,7 +73,15 @@ function SnapItem({ snap, isInbox, onView }) {
       <div className="shrink-0">
         {isInbox
           ? opened ? <Eye className="w-4 h-4 text-muted-foreground" /> : <EyeOff className="w-4 h-4 text-primary" />
-          : snap.viewed ? <CheckCheck className="w-4 h-4 text-blue-500" /> : <Eye className="w-4 h-4 text-muted-foreground/40" />
+          : snap.deletedFromInbox
+            ? (
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-rose-500 bg-rose-50 dark:bg-rose-950/40 rounded-full px-2 py-0.5 whitespace-nowrap">
+                <Trash2 className="w-3 h-3" /> Seen & deleted
+              </span>
+            )
+            : snap.viewed
+              ? <CheckCheck className="w-4 h-4 text-blue-500" />
+              : <Eye className="w-4 h-4 text-muted-foreground/40" />
         }
       </div>
     </div>
