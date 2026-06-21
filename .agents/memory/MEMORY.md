@@ -3,3 +3,4 @@
 - [Bhaleri JS migration](bhaleri-js-migration.md) — full .tsx→.jsx migration decisions, phone auth, super_admin, Socket.IO, DB field aliases
 - [Bhaleri Marketplace upgrade](bhaleri-marketplace.md) — schema, auto-approve, new tables, hook signature change for useAddToCart
 - [Bhaleri Hinglish polish](bhaleri-hinglish-polish.md) — all UI text must be Hinglish; setLocation-during-render must use useEffect pattern
+- [Bhaleri shop routes](bhaleri-shop-routes.md) — two shop systems: /user-shops list→/shop/:id (ShopView), /shops/:id (legacy ShopDetail); auto-booking is /book/auto

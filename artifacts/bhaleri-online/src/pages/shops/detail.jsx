@@ -1,13 +1,36 @@
-import { useRoute, Link } from "wouter";
-import { useGetShop } from "@/lib/api";
+import { useState } from "react";
+import { useRoute, Link, useLocation } from "wouter";
+import { useGetShop, useSendMessage } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
-import { Store, MapPin, Phone, Clock, ArrowLeft, Tag } from "lucide-react";
+import { Store, MapPin, Phone, Clock, ArrowLeft, Tag, MessageCircle, Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ShopDetail() {
   const [, params] = useRoute("/shops/:id");
   const { data: shop, isLoading, error } = useGetShop(Number(params?.id), { enabled: !!params?.id });
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const sendMsg = useSendMessage();
+
+  const handleChatOwner = () => {
+    if (!user) { setLocation("/login"); return; }
+    if (!shop.userId) { toast({ title: "Shop owner se connect nahi ho pa raha", variant: "destructive" }); return; }
+    sendMsg.mutate(
+      { receiverId: shop.userId, content: `Hi! Mujhe "${shop.name}" ke baare mein jaankari chahiye.` },
+      {
+        onSuccess: () => {
+          toast({ title: "Message bhej diya!" });
+          setLocation(`/messages/${shop.userId}`);
+        },
+        onError: () => toast({ title: "Message nahi bheja ja saka", variant: "destructive" }),
+      }
+    );
+  };
 
   if (isLoading) return (
     <div className="max-w-2xl mx-auto space-y-4">
@@ -19,16 +42,18 @@ export default function ShopDetail() {
   if (error || !shop) return (
     <div className="text-center py-20">
       <Store className="w-12 h-12 mx-auto mb-3 text-muted-foreground/40" />
-      <p className="text-destructive">Shop not found.</p>
+      <p className="text-destructive">Shop nahi mili.</p>
       <Link href="/shops"><Button variant="outline" className="mt-4"><ArrowLeft className="w-4 h-4 mr-2" />Back</Button></Link>
     </div>
   );
 
+  const isOwn = user && shop.userId === user.id;
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6 pb-12">
       <Link href="/shops">
         <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm group">
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" /> Back to Shops
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" /> Shops par wapas
         </button>
       </Link>
 
@@ -42,12 +67,17 @@ export default function ShopDetail() {
             <div className="w-20 h-20 bg-green-200/60 dark:bg-green-800/30 rounded-full flex items-center justify-center">
               <Store className="w-10 h-10 text-green-500" />
             </div>
-            <span className="text-green-400 text-sm font-medium">No photo added</span>
+            <span className="text-green-400 text-sm font-medium">Koi photo nahi</span>
           </div>
         )}
         {shop.type && (
           <div className="absolute top-3 left-3 bg-white/90 dark:bg-black/70 text-green-700 dark:text-green-300 text-sm font-medium px-3 py-1 rounded-full shadow-sm">
             {shop.type}
+          </div>
+        )}
+        {shop.isVerified && (
+          <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-medium px-2.5 py-1 rounded-full shadow-sm">
+            ✓ Verified
           </div>
         )}
       </div>
@@ -56,7 +86,10 @@ export default function ShopDetail() {
         <CardContent className="p-6 space-y-5">
           <div>
             <h1 className="text-2xl font-bold">{shop.name}</h1>
-            {shop.description && <p className="text-muted-foreground mt-2 leading-relaxed">{shop.description}</p>}
+            {shop.ownerName && (
+              <p className="text-sm text-muted-foreground mt-1">Owner: <span className="font-medium text-foreground">{shop.ownerName}</span></p>
+            )}
+            {shop.description && <p className="text-muted-foreground mt-2 leading-relaxed text-sm">{shop.description}</p>}
           </div>
 
           {shop.availableItems && (
@@ -90,12 +123,34 @@ export default function ShopDetail() {
             )}
           </div>
 
-          {shop.phone && (
-            <a href={`tel:${shop.phone}`}>
-              <Button className="w-full bg-green-600 hover:bg-green-700 mt-2">
-                <Phone className="w-4 h-4 mr-2" /> Call Now
-              </Button>
-            </a>
+          {/* Action buttons */}
+          {!isOwn && (
+            <div className="flex gap-3 pt-2">
+              {shop.userId && (
+                <Button
+                  className="flex-1 gap-2 h-11 bg-green-600 hover:bg-green-700"
+                  onClick={handleChatOwner}
+                  disabled={sendMsg.isPending}
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  {sendMsg.isPending ? "Bhej raha hai…" : "Chat with Owner"}
+                </Button>
+              )}
+              {shop.phone && (
+                <a href={`tel:${shop.phone}`} className="flex-1">
+                  <Button variant="outline" className="w-full h-11 gap-2">
+                    <Phone className="w-4 h-4" /> Call Now
+                  </Button>
+                </a>
+              )}
+            </div>
+          )}
+
+          {isOwn && (
+            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+              <Store className="w-4 h-4 text-green-600 shrink-0" />
+              <span className="text-sm text-green-700 dark:text-green-300 font-medium">Yeh aapki shop hai</span>
+            </div>
           )}
         </CardContent>
       </Card>

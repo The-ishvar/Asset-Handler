@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Link } from "wouter";
-import { useListReels, useToggleReelLike, useRecordReelView, useListReelComments, useAddReelComment } from "@/lib/api";
+import { Link, useLocation } from "wouter";
+import { useListReels, useToggleReelLike, useRecordReelView, useListReelComments, useAddReelComment, useToggleFollow } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Heart, MessageCircle, Share2, Eye, Plus, Volume2, VolumeX, Send, X, Play } from "lucide-react";
+import { Heart, MessageCircle, Share2, Eye, Plus, Volume2, VolumeX, Send, X, Play, Bookmark, UserPlus, UserCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -28,10 +28,15 @@ function ReelCard({ reel, isActive }) {
   const [likeCount, setLikeCount] = useState(reel.likeCount);
   const viewRecordedRef = useRef(false);
 
+  const [saved, setSaved] = useState(false);
+  const [following, setFollowing] = useState(false);
+
   const toggleLike = useToggleReelLike();
+  const toggleFollow = useToggleFollow();
   const recordView = useRecordReelView();
   const { data: comments } = useListReelComments(reel.id, { enabled: showComments });
   const addComment = useAddReelComment();
+  const [, setLocation] = useLocation();
 
   const ytId = getYouTubeId(reel.videoUrl);
 
@@ -112,6 +117,23 @@ function ReelCard({ reel, isActive }) {
     }
   };
 
+  const handleSave = () => {
+    if (!user) { toast({ title: "Save karne ke liye login karein", variant: "destructive" }); return; }
+    setSaved((v) => !v);
+    toast({ title: saved ? "Reel unsaved" : "Reel saved!" });
+  };
+
+  const handleFollow = () => {
+    if (!user) { toast({ title: "Follow karne ke liye login karein", variant: "destructive" }); return; }
+    const isOwnReel = reel.userId === user?.id;
+    if (isOwnReel) { toast({ title: "Aap khud ko follow nahi kar sakte" }); return; }
+    const prev = following;
+    setFollowing((v) => !v);
+    toggleFollow.mutate({ id: reel.userId }, {
+      onError: () => setFollowing(prev),
+    });
+  };
+
   const handleComment = (e) => {
     e.preventDefault();
     if (!user) { toast({ title: "Comment karne ke liye login karein", variant: "destructive" }); return; }
@@ -167,13 +189,27 @@ function ReelCard({ reel, isActive }) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none" />
 
       {/* Bottom info */}
-      <div className="absolute bottom-20 left-4 right-16 text-white pointer-events-none">
+      <div className="absolute bottom-20 left-4 right-16 text-white">
         <div className="flex items-center gap-2 mb-2">
-          <Avatar className="w-8 h-8 border-2 border-white/60">
+          <Avatar className="w-9 h-9 border-2 border-white/60">
             <AvatarImage src={reel.userAvatarUrl || ""} />
             <AvatarFallback className="text-xs bg-white/20 text-white">{(reel.userName || "?").charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
-          <span className="font-semibold text-sm drop-shadow">{reel.userName || "User"}</span>
+          <div className="flex-1 min-w-0">
+            <span className="font-semibold text-sm drop-shadow">{reel.userName || "User"}</span>
+          </div>
+          {user && reel.userId !== user?.id && (
+            <button
+              onClick={handleFollow}
+              className={`text-xs font-bold px-3 py-1 rounded-full border transition-all active:scale-95 ${
+                following
+                  ? "bg-white/20 border-white/60 text-white"
+                  : "bg-white text-black border-transparent"
+              }`}
+            >
+              {following ? "Following" : "Follow"}
+            </button>
+          )}
         </div>
         <h3 className="font-bold text-base leading-tight mb-1 drop-shadow">{reel.title}</h3>
         {reel.description && <p className="text-white/80 text-sm line-clamp-2">{reel.description}</p>}
@@ -193,6 +229,13 @@ function ReelCard({ reel, isActive }) {
             <MessageCircle className="w-6 h-6" />
           </div>
           <span className="text-xs font-bold drop-shadow">{reel.commentCount}</span>
+        </button>
+
+        <button onClick={handleSave} className="flex flex-col items-center gap-1 text-white">
+          <div className={`p-2.5 rounded-full transition-all active:scale-90 ${saved ? "bg-yellow-500 scale-110" : "bg-black/40 backdrop-blur-sm"}`}>
+            <Bookmark className={`w-6 h-6 transition-all ${saved ? "fill-white text-white" : ""}`} />
+          </div>
+          <span className="text-xs font-bold drop-shadow">Save</span>
         </button>
 
         <button onClick={handleShare} className="flex flex-col items-center gap-1 text-white">

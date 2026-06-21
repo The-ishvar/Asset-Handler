@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import { useListListings, useListReels, usePatchMyProfile, useUpdateUser, useGetUserProfile } from "@/lib/api";
+import { useListListings, useListReels, usePatchMyProfile, useUpdateUser, useGetUserProfile, useGetWishlist, useGetMyShop } from "@/lib/api";
 import { useLocation, Link } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Settings, LogOut, Shield, Plus, Play, Edit3, Phone, Mail, CalendarClock, ClipboardList, Lock, Eye, EyeOff } from "lucide-react";
+import { Package, Settings, LogOut, Shield, Plus, Play, Edit3, Phone, CalendarClock, ClipboardList, Lock, Eye, EyeOff, Heart, Store, MapPin, Clock } from "lucide-react";
 import MyBookings from "@/components/booking/MyBookings";
 import { useProviderDashboard, useChangePassword } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
@@ -148,6 +148,10 @@ export default function Profile() {
     { enabled: !!user?.id }
   );
   const { data: profile } = useGetUserProfile(user?.id, { enabled: !!user?.id });
+  const { data: wishlistIds = [], isLoading: wishlistLoading } = useGetWishlist({ enabled: !!user });
+  const { data: allListings = [], isLoading: allListingsLoading } = useListListings({}, { enabled: wishlistIds.length > 0 });
+  const wishlistListings = allListings.filter((l) => wishlistIds.includes(l.id));
+  const { data: myShop, isLoading: myShopLoading } = useGetMyShop({ enabled: !!user });
   const isProvider = user?.role === "provider" || user?.role === "admin" || user?.role === "super_admin";
   const { data: providerData } = useProviderDashboard({ enabled: isProvider, retry: false });
 
@@ -301,6 +305,12 @@ export default function Profile() {
           <TabsTrigger value="reels" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm shrink-0">
             <Play className="w-4 h-4 mr-1.5" /> Reels
           </TabsTrigger>
+          <TabsTrigger value="saved" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm shrink-0">
+            <Heart className="w-4 h-4 mr-1.5" /> Saved
+          </TabsTrigger>
+          <TabsTrigger value="myshop" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm shrink-0">
+            <Store className="w-4 h-4 mr-1.5" /> My Shop
+          </TabsTrigger>
           <TabsTrigger value="bookings" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm shrink-0">
             <CalendarClock className="w-4 h-4 mr-1.5" /> Bookings
           </TabsTrigger>
@@ -370,10 +380,92 @@ export default function Profile() {
           )}
         </TabsContent>
 
+        <TabsContent value="saved" className="p-4 mt-0">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-semibold">Saved Items</h3>
+            <span className="text-xs text-muted-foreground">{wishlistIds.length} items</span>
+          </div>
+          {wishlistLoading || allListingsLoading ? (
+            <div className="space-y-3">{[1,2].map((i) => <div key={i} className="h-20 bg-muted animate-pulse rounded-lg" />)}</div>
+          ) : !wishlistListings.length ? (
+            <div className="text-center py-12 bg-muted/20 rounded-xl border border-dashed">
+              <Heart className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
+              <p className="text-muted-foreground text-sm">Koi saved item nahi hai.</p>
+              <Link href="/buy-sell"><Button variant="outline" size="sm" className="mt-3">Marketplace Dekhein</Button></Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {wishlistListings.map((listing) => {
+                let thumb = listing.photoUrl;
+                try { const a = JSON.parse(thumb); thumb = Array.isArray(a) ? a[0] : thumb; } catch {}
+                return (
+                  <Link key={listing.id} href={`/buy-sell/${listing.id}`}>
+                    <div className="border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-card">
+                      <div className="h-32 bg-muted relative overflow-hidden">
+                        {thumb ? <img src={thumb} alt={listing.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Package className="w-8 h-8 text-muted-foreground/30" /></div>}
+                        <div className="absolute top-1.5 right-1.5 bg-white/90 dark:bg-black/70 rounded-full p-1">
+                          <Heart className="w-3 h-3 fill-red-500 text-red-500" />
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <p className="text-xs font-semibold truncate">{listing.title}</p>
+                        <p className="text-xs text-primary font-bold mt-0.5">₹{Number(listing.price).toLocaleString("en-IN")}</p>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="myshop" className="p-4 mt-0">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-semibold">My Shop</h3>
+            {!myShop && <Button size="sm" asChild><Link href="/user-shops/new"><Plus className="w-3.5 h-3.5 mr-1" /> Shop Banayein</Link></Button>}
+          </div>
+          {myShopLoading ? (
+            <div className="h-48 bg-muted animate-pulse rounded-xl" />
+          ) : !myShop ? (
+            <div className="text-center py-12 bg-muted/20 rounded-xl border border-dashed">
+              <Store className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
+              <p className="text-muted-foreground text-sm mb-3">Abhi aapki koi shop nahi hai.</p>
+              <Button size="sm" asChild><Link href="/user-shops/new"><Plus className="w-3.5 h-3.5 mr-1" /> Shop Shuru Karein</Link></Button>
+            </div>
+          ) : (
+            <Link href={`/user-shops/${myShop.id}`}>
+              <div className="border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-card">
+                <div className="h-36 bg-gradient-to-br from-green-100 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/20 relative">
+                  {myShop.photoUrl ? <img src={myShop.photoUrl} alt={myShop.name} className="w-full h-full object-cover" /> : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Store className="w-14 h-14 text-green-300" />
+                    </div>
+                  )}
+                  {myShop.type && <div className="absolute top-2 left-2 bg-white/90 dark:bg-black/70 text-green-700 dark:text-green-300 text-xs font-medium px-2 py-0.5 rounded-full">{myShop.type}</div>}
+                </div>
+                <div className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <h4 className="font-bold text-base">{myShop.name}</h4>
+                    <Badge className="bg-green-100 text-green-700 shrink-0 text-xs">Active</Badge>
+                  </div>
+                  {myShop.description && <p className="text-sm text-muted-foreground line-clamp-2">{myShop.description}</p>}
+                  <div className="flex gap-4 text-xs text-muted-foreground pt-1">
+                    {myShop.address && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {myShop.address}</span>}
+                    {myShop.timing && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {myShop.timing}</span>}
+                  </div>
+                  <Button size="sm" variant="outline" className="w-full mt-2" asChild>
+                    <Link href={`/user-shops/${myShop.id}/edit`}>Edit Shop</Link>
+                  </Button>
+                </div>
+              </div>
+            </Link>
+          )}
+        </TabsContent>
+
         <TabsContent value="bookings" className="p-4 mt-0">
           <div className="mb-4">
             <h3 className="font-semibold">My Bookings</h3>
-            <p className="text-sm text-muted-foreground">View and manage your ride, bus, event and medical bookings.</p>
+            <p className="text-sm text-muted-foreground">Aapki rides, buses, aur events ki bookings.</p>
           </div>
           <MyBookings />
         </TabsContent>

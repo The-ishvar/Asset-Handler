@@ -1,0 +1,152 @@
+Update the existing Bhaleri Online application without changing the current theme, colors, layout, responsiveness, animations, bottom navigation, or overall UI design.
+
+Enable ONLY these features:
+
+* Home Page
+* Login / Register
+* Posts
+* Reels
+* Chat
+* Buy & Sell Marketplace
+* Shops
+* Auto Booking
+* Bus Booking
+* User Profile
+
+Disable and hide all other features from:
+
+* Bottom navigation
+* Sidebar
+* Home page cards
+* Search results
+* User profile
+* Routes and APIs
+
+If a user directly opens a disabled route, show:
+
+"This feature is currently unavailable."
+
+HOME PAGE
+
+* Keep the existing hero section and theme.
+
+* Add a global search bar with autocomplete.
+
+* Search should work for:
+
+  * Shops
+  * Products
+  * Posts
+  * Reels
+  * Auto services
+  * Bus routes
+  * Users
+
+* Show quick access cards only for enabled features.
+
+* Never show empty sections.
+
+* Display sample data when the database is empty.
+
+REELS
+
+* Open reels in full-screen vertical mode like YouTube Shorts and Instagram Reels.
+* Enable vertical swipe navigation.
+* Auto-play videos.
+* Show like, comment, share, save, and follow buttons.
+* Show creator profile information.
+* Allow upload directly from the device gallery.
+* Users can add title, description, and hashtags.
+* Optimize video loading for smooth performance.
+
+CHAT
+
+* Redesign chat similar to WhatsApp while keeping the Bhaleri Online theme.
+
+* Features:
+
+  * Real-time messaging
+  * Online/offline status
+  * Last seen
+  * Typing indicator
+  * Read receipts
+  * Unread message count
+  * Image sharing
+  * Emoji picker
+  * Search conversations
+
+* Add "Chat with Seller" and "Chat with Shop Owner" buttons.
+
+MARKETPLACE
+
+Redesign Buy & Sell similar to Meesho.
+
+Features:
+
+* Responsive product grid
+* Product image gallery
+* Search and filters
+* Category tabs
+* Product details page
+* Add to Cart
+* Buy Now
+* Wishlist
+* Ratings and reviews
+* Related products
+* Seller profile
+
+Users can:
+
+* Upload product images from gallery
+* Add title, description, category, price, quantity, and location
+* Edit or delete their listings
+
+SHOPS
+
+* Show all shops correctly.
+* Fix the issue where created shops do not appear.
+* Clicking a shop opens the shop details page.
+* Show all products of that shop.
+* Add search and category filters inside shops.
+
+AUTO BOOKING
+
+Users can:
+
+* Select pickup and destination
+* View estimated fare
+* Book rides
+* Track booking status
+
+BUS BOOKING
+
+Users can:
+
+* View bus routes and timings
+* Select seats
+* Book tickets
+* View tickets inside their profile
+
+USER PROFILE
+
+Include:
+
+* Personal information
+* My Posts
+* My Reels
+* My Products
+* My Shops
+* My Bookings
+* Saved Items
+* Followers and Following
+* Settings
+
+GENERAL REQUIREMENTS
+
+* Keep everything mobile-first and fully responsive.
+* Preserve the existing UI and design system.
+* Use lazy loading and skeleton loaders.
+* Ensure all features work without page refresh.
+* Show real-time updates wherever possible.
+* Optimize images and videos.
+* Make the application production-ready.

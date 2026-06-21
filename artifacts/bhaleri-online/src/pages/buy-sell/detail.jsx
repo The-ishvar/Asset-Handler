@@ -300,22 +300,24 @@ export default function ListingDetail() {
 
           {/* CTA buttons */}
           {!isOwnListing && (
-            <div className="flex gap-3">
-              <Button className="flex-1 bg-purple-600 hover:bg-purple-700 gap-2" onClick={handleBuyNow} disabled={listing.isSoldOut || sendMsg.isPending}>
-                <MessageCircle className="w-4 h-4" />
-                {sendMsg.isPending ? "Sending…" : "Contact Seller"}
-              </Button>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Button className="flex-1 bg-purple-600 hover:bg-purple-700 gap-2 h-11" onClick={handleBuyNow} disabled={listing.isSoldOut || sendMsg.isPending}>
+                  <MessageCircle className="w-4 h-4" />
+                  {sendMsg.isPending ? "Bhej raha hai…" : "Chat with Seller"}
+                </Button>
+                <Button variant="outline" size="icon" className={`h-11 w-11 shrink-0 ${isWishlisted ? "border-red-300 bg-red-50 dark:bg-red-950/20" : ""}`} onClick={handleWishlist}>
+                  <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+                </Button>
+              </div>
               <Button
                 variant={isInCart ? "default" : "outline"}
-                className={`flex-1 gap-2 ${isInCart ? "bg-green-600 hover:bg-green-700 text-white" : ""}`}
+                className={`w-full gap-2 h-11 ${isInCart ? "bg-green-600 hover:bg-green-700 text-white" : ""}`}
                 onClick={handleAddToCart}
                 disabled={listing.isSoldOut || addToCart.isPending}
               >
                 <ShoppingCart className="w-4 h-4" />
                 {listing.isSoldOut ? "Sold Out" : isInCart ? "View Cart" : addToCart.isPending ? "Adding…" : "Add to Cart"}
-              </Button>
-              <Button variant="outline" size="icon" onClick={handleWishlist} className={isWishlisted ? "border-red-300 bg-red-50 dark:bg-red-950/20" : ""}>
-                <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
               </Button>
             </div>
           )}
